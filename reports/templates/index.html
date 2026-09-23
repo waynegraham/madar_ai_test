@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Historical Arabic-script manuscripts</p>
+<h1>Reading the page, tracing the evidence</h1>
+<p class="lede">A working record of experiments in identifying text, annotations, stamps and seals, and transcribing manuscript passages.</p>
+<section aria-labelledby="reading-guide">
+<h2 id="reading-guide">How to read this report</h2>
+<p>Each entry below represents one manuscript image. A file identifier is not a catalogue description, and several images may belong to the same manuscript.</p>
+<dl class="guide">
+<div><dt>Human reviewed</dt><dd>Human-corrected material explicitly stored as ground truth. The report identifies any missing information about the reviewer or scope of corrections.</dd></div>
+<div><dt>Machine suggested</dt><dd>A proposed reading or identification from a model, including machine-generated eScriptorium output. It is not an established finding.</dd></div>
+<div><dt>Not yet reviewed</dt><dd>No completed human review is recorded. Human-drawn layout annotations are identified separately; they do not establish an independently reviewed transcription.</dd></div>
+</dl>
+<p>Counts describe what was recorded, not how accurately a system understood the page. Missing evidence is shown as unavailable.</p>
+</section>
+<section aria-labelledby="inventory"><h2 id="inventory">Manuscript images <span class="muted">({{ report.pages|length }})</span></h2>
+{% if report.pages %}
+<div class="table-wrap"><table><thead><tr><th scope="col">Image identifier</th><th scope="col">Saved records</th><th scope="col">Human layout reference</th><th scope="col">Human-corrected text</th></tr></thead><tbody>
+{% for page in report.pages %}<tr><th scope="row"><a href="manuscripts/{{ page.filename }}">{{ page.id }}</a></th><td>{{ page.artifacts|length }}</td><td>{{ "Available; see review notes" if page.has_human_layout else "Unavailable" }}</td><td>{{ "Available; see correction scope" if page.has_reviewed_text else "Unavailable" }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p>No manuscript images or saved experiment records were found.</p>{% endif %}
+</section>
+{% if report.issues %}<section class="notice"><h2>Records needing attention</h2><p>Some files could not be included. Their absence must not be interpreted as a negative finding.</p><ul>{% for issue in report.issues %}<li>{{ issue }}</li>{% endfor %}</ul></section>{% endif %}
+<section><h2>What is not established yet</h2><p>This foundation does not calculate accuracy or establish waqf status, ownership, provenance, people, institutions, places, or dates. Such conclusions require suitable evidence and scholarly review.</p></section>
+{% endblock %}

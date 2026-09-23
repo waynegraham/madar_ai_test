@@ -628,3 +628,67 @@ This modular structure allows systems to participate in individual tasks without
 This project is currently exploratory.
 
 Initial work focuses on a small number of representative historical documents processed previously with eScriptorium. The immediate goal is to determine where modern VLMs improve on or complement existing segmentation and HTR pipelines before defining a larger annotation campaign or challenge dataset.
+
+## Static research report
+
+Build an offline HTML site from the saved experiments, without running any models:
+
+```bash
+uv run waqf-report build
+```
+
+Open `reports/generated/index.html` in a browser, or publish the **contents** of
+`reports/generated/` to GitHub Pages or any static host. Links and styles are
+relative, so the report also works beneath a project URL. No JavaScript, remote
+fonts, inference server, or network access is required by the report generator.
+`uv` may need to install Python dependencies on first use.
+
+Alternative locations:
+
+```bash
+uv run waqf-report build --data data --output /tmp/waqf-report
+```
+
+Run commands from the repository root, or supply explicit paths. Output must be
+separate from source data, templates, and Python code. A nonempty output folder
+must belong to a previous report build. Builds update generated pages and remove
+stale detail pages listed in the previous build's ownership file.
+
+Report sources:
+
+- `src/waqf_vlm/report.py`: saved-data loading and CLI rendering.
+- `reports/templates/`: Jinja2 base, index, and manuscript-image templates.
+- `reports/static/css/site.css`: responsive site styles.
+- `reports/static/js/`: reserved for future optional enhancements.
+- `reports/generated/`: ignored build output; not research source data.
+
+The existing `src` package remains available to notebooks. The wheel also
+includes the `waqf_vlm` command package and report templates/static assets.
+
+### Evidence and review status
+
+`data/alto/*.xml` and `data/predictions/escriptorium/*.xml` are treated as
+**machine predictions**, never as ground truth. Only explicitly human-corrected
+exports placed in `data/ground-truth/alto/*.xml` are designated **human reviewed**.
+Do not put uncorrected machine exports in that reference directory. The report
+cannot infer review history from the ALTO format and notes that correction scope
+and reviewer identity are not recorded.
+
+`data/ground-truth/*.json` contains human-drawn layout references. These are
+identified as human annotations, with independent review and annotation
+completeness unrecorded; they are not labeled as reviewed transcriptions.
+Saved Qwen experiments under `data/results/<page>/<model>/` are **machine
+suggested** and **not yet reviewed**. These labels describe separate facts:
+origin and review status.
+
+The foundation lists saved region counts, ALTO text, and saved HTR/script/language
+suggestions. It does not compute accuracy, infer semantic findings, copy original
+images, or invent missing metadata. Invalid records appear in a data-quality
+notice; unavailable references are explicitly marked. A manuscript detail page
+represents one source image, not necessarily a complete manuscript.
+
+Run focused checks with:
+
+```bash
+uv run python -m unittest discover -s tests -v
+```

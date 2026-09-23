@@ -1,0 +1,36 @@
+:root { color-scheme: light; --ink: #252e2c; --paper: #faf8f2; --accent: #24584f; --line: #d5d8cf; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 1.05rem/1.65 system-ui, sans-serif; }
+a { color: var(--accent); text-underline-offset: .2em; }
+a:focus-visible, summary:focus-visible { outline: 3px solid #a86220; outline-offset: 4px; }
+.site-header, main, footer { max-width: 1120px; margin: auto; padding: 1.5rem 2rem; }
+.site-header { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.site-header a { font-weight: 700; }
+main { padding-top: 3rem; }
+h1, h2, h3 { font-family: Georgia, serif; line-height: 1.2; font-weight: 500; }
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); overflow-wrap: anywhere; margin: .4em 0; }
+h2 { font-size: 1.7rem; } h3 { font-size: 1.4rem; } h4 { margin-bottom: .5rem; }
+p { max-width: 78ch; }
+.lede { font-size: 1.2rem; max-width: 65ch; }
+.eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; color: var(--accent); font-weight: 700; }
+section { margin: 2.8rem 0; }
+.guide { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.guide div { border-top: 3px solid var(--line); padding-top: 1rem; }
+dt { font-weight: 650; } dd { margin: .3rem 0 1rem; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+th, td { text-align: left; vertical-align: top; padding: 1rem .6rem; border-bottom: 1px solid var(--line); }
+.record { padding: 1.6rem; border: 1px solid var(--line); background: #fff; margin: 1.5rem 0; border-radius: .3rem; }
+.badges { display: flex; flex-wrap: wrap; gap: .5rem; }
+.badge { background: #f0e9d9; color: #55472d; border-radius: .2rem; padding: .2rem .6rem; font-size: .8rem; }
+.reviewed { background: #e0eee7; color: #244e3a; }
+.origin, .muted { color: #565e59; }
+.transcription { white-space: pre-wrap; unicode-bidi: plaintext; overflow-wrap: anywhere; font: 1.35rem/2 Georgia, "Noto Naskh Arabic", serif; border-inline-start: 3px solid var(--line); padding: 1rem; margin: 1rem 0; background: var(--paper); }
+code { overflow-wrap: anywhere; font-size: .85em; }
+details { border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 1.4rem; }
+summary { cursor: pointer; color: var(--accent); }
+.notice { border-left: 4px solid #a86220; padding-left: 1.5rem; }
+footer { border-top: 1px solid var(--line); font-size: .85rem; color: #565e59; margin-top: 3rem; }
+.skip-link { position: absolute; left: -9999px; } .skip-link:focus { left: 1rem; top: 1rem; background: white; padding: 1rem; }
+@media (max-width: 700px) { .guide { grid-template-columns: 1fr; } .site-header, main, footer { padding: 1.2rem; } .site-header { flex-direction: column; } .record { padding: 1rem; } }
+@media print { body { background: white; } details { display: block; } .record { break-inside: avoid; } }

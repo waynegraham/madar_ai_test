@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<nav aria-label="Breadcrumb"><a href="../index.html">All manuscript images</a></nav>
+<p class="eyebrow">Manuscript image</p><h1>{{ page.id }}</h1>
+<p class="lede">Recorded observations and suggested readings for this image. Catalogue title, date, place, and collection description are unavailable in the report data.</p>
+<section><h2>Source and reference material</h2>
+{% if page.images %}<p>Source image files:</p><ul>{% for image in page.images %}<li><code>{{ image }}</code></li>{% endfor %}</ul><p class="muted">Original images are not copied into this report.</p>{% else %}<p>Source image: unavailable.</p>{% endif %}
+<p>Human layout reference: {{ "available; review and completeness notes appear below." if page.has_human_layout else "unavailable." }}</p>
+<p>Human-corrected transcription: {{ "available in the designated reference export; correction scope is not recorded." if page.has_reviewed_text else "unavailable." }}</p>
+</section>
+<section><h2>Saved observations</h2>
+{% for artifact in page.artifacts %}
+<article class="record">
+<div class="badges"><span class="badge {{ 'reviewed' if artifact.review == 'Human reviewed' else '' }}">{{ artifact.review }}</span><span class="badge">{{ "Machine suggested" if artifact.role == "prediction" else "Human reference material" }}</span></div>
+<h3>{{ artifact.kind }}</h3><p class="origin">{{ artifact.origin }}</p>
+{% for note in artifact.notes %}<p>{{ note }}</p>{% endfor %}
+{% if artifact.counts %}<h4>Recorded regions</h4><ul>{% for label, count in artifact.counts.items() %}<li>{{ label }}: {{ count }}</li>{% endfor %}</ul>{% endif %}
+{% if artifact.transcriptions %}<h4>{{ "Reference text" if artifact.role == "reference" else "Suggested text — not a verified reading" }}</h4>{% for text in artifact.transcriptions %}<div class="transcription" dir="auto">{{ text }}</div>{% endfor %}{% elif artifact.kind == "Transcription, script and language" %}<p>Transcription: unavailable.</p>{% endif %}
+<details><summary>Record details and source</summary><dl>{% for key, value in artifact.details.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}<dt>Saved file (relative to data directory)</dt><dd><code>{{ artifact.path }}</code></dd></dl></details>
+</article>
+{% else %}<p>No readable experiment or annotation records are available for this image.</p>{% endfor %}
+</section>
+<section><h2>Interpretation remains open</h2><p>Accuracy has not been calculated in this report. Waqf evidence, ownership, provenance, people, institutions, places, and dates have not been assessed here. An absence of recorded analysis does not mean an absence of evidence in the manuscript.</p></section>
+{% endblock %}
