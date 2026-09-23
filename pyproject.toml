@@ -1,7 +1,7 @@
 [project]
 name = "madar-ai-test"
 version = "0.1.0"
-description = "Add your description here"
+description = "VLM experiments for historical document analysis"
 readme = "README.md"
 authors = [
     { name = "Wayne Graham", email = "wgraham@clir.org" }
@@ -19,9 +19,9 @@ dependencies = [
     "shapely>=2.1.2",
 ]
 
-[project.scripts]
-madar-ai-test = "madar_ai_test:main"
-
 [build-system]
-requires = ["uv_build>=0.12.17,<0.13.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
