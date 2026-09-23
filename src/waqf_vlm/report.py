@@ -17,6 +17,7 @@ from src.annotation import load_annotations
 from src.images import create_vlm_derivative, image_info
 from src.segmentation import alto_to_regions, vlm_json_to_regions
 from .experiment import SegmentationSystem, Disagreement, find_disagreements, select_disagreements, illustrate_experiment, system_name
+from .htr import HTRComparison, load_htr_comparisons, render_htr_crops
 
 
 LABELS = {
@@ -63,6 +64,7 @@ class Manuscript:
     segmentations: list[SegmentationSystem] = field(default_factory=list)
     disagreements: list[Disagreement] = field(default_factory=list)
     all_disagreements: list[Disagreement] = field(default_factory=list)
+    htr_comparisons: list[HTRComparison] = field(default_factory=list)
 
     @property
     def predictions(self) -> list[SegmentationSystem]:
@@ -83,7 +85,7 @@ class Manuscript:
 
     @property
     def has_reviewed_text(self) -> bool:
-        return any(a.role == "reference" and a.transcriptions for a in self.artifacts)
+        return any(a.role == "reference" and a.transcriptions for a in self.artifacts) or any(g.human is not None for g in self.htr_comparisons)
 
 
 @dataclass
@@ -244,6 +246,11 @@ def load_report_data(data_dir: Path) -> ReportData:
         manuscript.segmentations.sort(key=lambda s: (s.reviewed, {"eScriptorium": 0, "Qwen3-VL 8B": 1, "Qwen3-VL 30B": 2}.get(s.name, 3), s.source))
         manuscript.all_disagreements = find_disagreements(manuscript.segmentations, LABELS, limit=None)
         manuscript.disagreements = select_disagreements(manuscript.all_disagreements)
+        manuscript.htr_comparisons = load_htr_comparisons(data_dir, manuscript.id, issues)
+        for artifact in manuscript.artifacts:
+            if artifact.kind == "Human layout annotations" and any(g.human is not None and g.human.source == artifact.path for g in manuscript.htr_comparisons):
+                artifact.notes = [note for note in artifact.notes if not note.startswith("No reference transcription")]
+                artifact.notes.append("Explicitly human-corrected text is available for some regions in the HTR comparison; this does not establish whole-page review.")
     return ReportData([pages[key] for key in sorted(pages)], issues)
 
 
@@ -301,11 +308,12 @@ def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None
                               autoescape=select_autoescape(["html", "xml"]))
     index_template = environment.get_template("index.html")
     page_template = environment.get_template("manuscript.html")
+    method_template = environment.get_template("method.html")
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "manuscripts").mkdir(exist_ok=True)
     # Refuse symlink destinations rather than following them outside output.
     for destination in [output_dir / "static", output_dir / "manuscripts", marker,
-                        output_dir / "index.html"]:
+                        output_dir / "index.html", output_dir / "method.html"]:
         if destination.is_symlink():
             raise ValueError(f"Refusing symlink output: {destination}")
     static_destination = output_dir / "static"
@@ -316,10 +324,16 @@ def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None
                 raise ValueError(f"Refusing symlink output: {destination}")
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, destination)
+    (output_dir / "method.html").write_text(method_template.render(
+        asset_prefix="", current_page="method", title="How this experiment works"), encoding="utf-8")
     prepare_figures(report, data_dir, output_dir)
     filenames = []
     for manuscript in report.pages:
         if manuscript.figures:
+            try:
+                render_htr_crops(manuscript.htr_comparisons, data_dir / manuscript.figures[0].source, output_dir)
+            except (OSError, ValueError) as exc:
+                report.issues.append(f"{manuscript.id}: HTR crops unavailable ({exc}).")
             try:
                 illustrate_experiment(manuscript.segmentations, manuscript.all_disagreements,
                                       data_dir / manuscript.figures[0].source, output_dir)

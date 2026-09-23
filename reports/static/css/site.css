@@ -158,3 +158,28 @@ code { font-size: .88em; overflow-wrap: anywhere; }
 .all-disagreements { border-block: 1px solid var(--rule); margin-block: 2rem; padding-block: 1rem; }
 .all-disagreements > summary { color: var(--accent); cursor: pointer; font: 1rem/1.6 var(--sans); padding: .5rem 0; }
 .disagreement-provenance { font-size: .8rem; }
+
+/* HTR: the image and diplomatic readings take precedence over error measures. */
+.htr-comparison { max-width: 950px; margin-block: 3rem 4rem; }
+.htr-crop img { max-height: 40rem; object-fit: contain; }
+.region-identifier { display: block; font: .8rem/1.7 var(--sans); color: var(--muted); margin-top: .6rem; }
+.htr-human-reading, .htr-system-reading { padding-block: 1.3rem; border-top: 1px solid var(--rule); }
+.htr-system-reading { border-top-style: dashed; }
+.htr-comparison h4 { font: 600 .88rem/1.6 var(--sans); letter-spacing: .04em; margin: 0 0 .6rem; }
+.htr-transcription { padding-block: .6rem; text-align: start; }
+.reading-identification { font: .8rem/1.7 var(--sans); color: var(--muted); }
+.htr-metrics { font-size: .8rem; }
+
+/* Plain-language methodology: a semantic reading sequence, not a dashboard. */
+.publication-nav { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; font: .8rem/1.6 var(--sans); }
+.publication-nav [aria-current="page"] { text-decoration-thickness: 2px; }
+.method-page { max-width: 850px; }
+.method-pipeline { padding-left: 1.8rem; max-width: 72ch; }
+.method-pipeline > li { padding: .25rem 0 1.2rem 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--rule); }
+.method-pipeline > li::marker { color: var(--accent); font: 600 .9rem var(--sans); }
+.method-pipeline h3 { font-size: 1.3rem; margin-block: .6rem; }
+.method-pipeline p { margin-block: .6rem; }
+.method-glossary > div { padding-block: 1.2rem; border-top: 1px solid var(--rule); }
+.method-glossary dt { font: 600 1rem/1.6 var(--sans); }
+.method-glossary dd { margin: .6rem 0 0; max-width: var(--measure); }
+.site-header { flex-wrap: wrap; }

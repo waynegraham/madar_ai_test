@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% from "components.html" import manuscript_figure, segmentation_figure, review_labels %}
 {% from "disagreements.html" import disagreement_component %}
+{% from "htr.html" import htr_component %}
 {% block content %}
 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">All manuscript images</a></nav>
 <header class="page-heading">
 <p class="eyebrow">A manuscript experiment</p><h1 class="manuscript-identifier">Manuscript {{ page.id }}</h1>
 {% if page.predictions|length > 1 %}<p class="lede">The same manuscript page has been analyzed by {{ page.predictions|length }} document-analysis systems. Their proposed divisions of the page offer different starting points for examining its text, annotations, and other visible features.</p>{% else %}<p class="lede">This page brings together the manuscript image and the available document-analysis records. Further system comparisons are not yet available.</p>{% endif %}
 <p>Begin with the original image, then compare what the systems have marked. The comparisons describe differences in saved results; they do not determine which reading is correct.</p>
-<nav class="section-nav" aria-label="On this page"><a href="#original">Original manuscript</a><a href="#segmentation">Computer observations</a><a href="#inventory">Region inventory</a><a href="#disagreements">Disagreements</a><a href="#human-review">Human review</a></nav>
+<nav class="section-nav" aria-label="On this page"><a href="#original">Original manuscript</a><a href="#segmentation">Computer observations</a><a href="#inventory">Region inventory</a><a href="#disagreements">Disagreements</a><a href="#human-review">Human review</a><a href="#htr-comparison">Transcriptions</a></nav>
 </header>
 <section class="evidence-section" aria-labelledby="original">
 <div class="section-heading"><p class="eyebrow">Source evidence</p><h2 id="original">Original manuscript</h2></div>
@@ -46,9 +47,10 @@
 {% for system in page.corrected_alto %}{{ segmentation_figure(system, labels) }}{% endfor %}
 {% for artifact in page.artifacts if artifact.role == 'reference' and artifact.kind == 'eScriptorium ALTO' %}{% if artifact.transcriptions %}<h3>Reference transcription</h3><div class="reading-text">{% for text in artifact.transcriptions %}<div class="transcription" dir="auto">{{ text }}</div>{% endfor %}</div>{% else %}<p>Reference transcription unavailable in this corrected export.</p>{% endif %}{% endfor %}
 {% else %}<p class="review-pending-label">Human review not yet available.</p><p>No human-corrected eScriptorium ALTO is available for this page. Machine-generated ALTO remains a prediction.</p>{% endif %}
-{% for artifact in page.artifacts if artifact.kind == 'Human layout annotations' %}<aside class="scholarly-note"><p>Separately, {{ artifact.details.get('Regions') }} human-drawn region boxes are saved for this page. They are layout annotations, not a corrected ALTO review or a reviewed transcription. Independent review and page completeness are not recorded.</p></aside>{% endfor %}
+{% for artifact in page.artifacts if artifact.kind == 'Human layout annotations' %}<aside class="scholarly-note"><p>Separately, {{ artifact.details.get('Regions') }} human-drawn region boxes are saved for this page. Those boxes alone are layout annotations, not a corrected ALTO review. Any explicitly corrected text is shown in the transcription comparison below. Independent layout review and page completeness are not recorded.</p></aside>{% endfor %}
 <p class="scholarly-note">Human-corrected transcription: {{ 'available in the designated reference export; correction scope is not recorded.' if page.has_reviewed_text else 'unavailable.' }}</p>
 </section>
+{{ htr_component(page, labels) }}
 <section class="interpretation-section" aria-labelledby="why"><p class="eyebrow">Interpretation · future research</p><h2 id="why">Why this matters</h2>
 <p>Locating page features could eventually make them searchable across a larger manuscript corpus. A scholar might retrieve pages with proposed stamps or seals, compare marginal annotations, or bring together passages for closer reading.</p>
 <p>Finding a feature is only a first step. Establishing ownership, provenance, or waqf evidence requires reading the material in context and assessing it with scholarly expertise. The present comparisons do not establish those meanings.</p>

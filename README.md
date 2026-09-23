@@ -811,3 +811,45 @@ Disagreement crops retain native pixels from the original TIFF (preferred when
 multiple source formats are present), with up to 30 pixels of edge-clamped
 padding. Each crop links to that full-resolution PNG. A separate preview is
 limited to 900 pixels for inline display; no model inference is involved.
+
+### HTR comparisons
+
+Manuscript pages now show a crop followed by the human transcription (when
+available) and each saved system reading. `src/waqf_vlm/htr.py` groups results by
+an explicit `region_id` or the legacy `crops/<page>/<region-id>.png` input path.
+Only human-defined JSON regions or human-corrected ALTO blocks qualify; ambiguous
+or missing links are reported instead of guessed. Larger machine ALTO blocks are
+not substituted for a passage. Matching ALTO blocks require the same stable ID
+or unique reciprocal bounding-box IoU of at least 0.95.
+
+Human-corrected ALTO from `ground-truth/alto/` supplies reference text, never
+machine ALTO from `alto/` or `predictions/escriptorium/`. The HTR reader also
+supports an optional explicit extension to a human JSON region: `transcription`
+(string), `review_status: "human_corrected"`, and optional `script`/`language`.
+A transcription without that review status is not used as ground truth. The
+existing rectangle annotation widget does not author or preserve these extension
+fields; use corrected ALTO for its normal workflow.
+
+CER and WER are calculated with the existing evaluation helpers only when a
+linked human-corrected transcription exists, and are placed in a collapsed
+technical disclosure. No Unicode or editorial normalization is applied. CER uses
+code points and WER uses the evaluator's whitespace tokenization. Empty saved
+hypotheses are retained; unavailable text is not replaced by an empty string.
+ALTO lines are assembled in XML order with newline separators. UTF-8 HTML,
+Unicode-aware direction selection, and preserved whitespace keep Arabic-script
+readings and line breaks intact. Script and language suggestions are displayed
+as supplied, without treating a model's script/style vocabulary as authoritative.
+
+The existing example has two Qwen readings for `human-382299a4`, but no linked
+human transcription or unambiguous eScriptorium region reading. No error rates
+are reported for it. Crops are regenerated at native resolution from the original
+image using the human region and 30 pixels of context, with a separate display
+preview; they do not reconstruct unrecorded historical crop settings.
+
+### Guide for nontechnical readers
+
+`reports/templates/method.html` generates **How this experiment works** at
+`reports/generated/method.html`. The publication navigation links to it from
+every page. It explains the intended workflow, the current experiments' scope,
+and seven key terms in plain language, keeping machine suggestions, reviewed
+references, and historical interpretation distinct.
