@@ -853,3 +853,46 @@ preview; they do not reconstruct unrecorded historical crop settings.
 every page. It explains the intended workflow, the current experiments' scope,
 and seven key terms in plain language, keeping machine suggestions, reviewed
 references, and historical interpretation distinct.
+
+### Corpus overview and evaluation coverage
+
+`overview.html` is a calculated inventory of the currently represented pages,
+not the wider collection estimate. It counts pages once per system (any readable
+prediction task), sums usable prediction boxes separately from references, and
+reports HTR regions with actual reference-based error measures. Region totals
+include repeated detections across systems/runs; they are not unique features.
+Every table states its page, record, or region denominator.
+
+Manuscript counts require an explicit mapping; filename fragments and the generic
+METS document container are not treated as catalogue identities. Optional
+`data/corpus.json` metadata uses this structure (illustrative schema only):
+
+```json
+{
+  "pages": {
+    "PAGE_ID": {
+      "manuscript_id": "CATALOGUE_ID",
+      "layout_review_complete": true
+    }
+  }
+}
+```
+
+Only set `layout_review_complete` after the complete page layout has been reviewed.
+Partial mappings are labeled as partial counts. Missing mappings are shown as
+unavailable; no example metadata is added to the research data.
+
+Aggregate per-type metrics require a single corrected ALTO reference, documented
+complete layout review, no skipped reference blocks, and one prediction record
+per system/prompt/page. Multiple same-run records on one page are excluded from
+evaluation to avoid arbitrary run selection. Metrics use per-page bbox matching
+at IoU 0.5 with matching types, then pool TP/FP/FN counts. Each row shows paired
+pages, pages containing the reference type, and reference/predicted region counts.
+Zero denominators appear as undefined, not misleading zero percentages.
+
+The default publication threshold is five eligible paired pages **per system and
+prompt**, configurable with `--min-reviewed-pages`. This is a transparent reporting
+threshold, not a claim of statistical sufficiency; rare types may still have very
+small samples. Reviewed-page coverage can include partial references, whereas
+layout evaluation requires documented complete coverage. No corpus-level score
+is invented when those conditions are not met.

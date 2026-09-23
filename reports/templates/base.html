@@ -11,7 +11,7 @@
   <header class="site-header">
     <a class="publication-title" href="{{ asset_prefix }}index.html">Manuscript studies</a>
     <span class="publication-subtitle">A working research publication</span>
-    <nav class="publication-nav" aria-label="Publication"><a href="{{ asset_prefix }}index.html">Manuscripts</a><a href="{{ asset_prefix }}method.html"{% if current_page|default('') == 'method' %} aria-current="page"{% endif %}>How this experiment works</a></nav>
+    <nav class="publication-nav" aria-label="Publication"><a href="{{ asset_prefix }}index.html">Manuscripts</a><a href="{{ asset_prefix }}overview.html"{% if current_page|default('') == 'overview' %} aria-current="page"{% endif %}>Corpus overview</a><a href="{{ asset_prefix }}method.html"{% if current_page|default('') == 'method' %} aria-current="page"{% endif %}>How this experiment works</a></nav>
   </header>
   <main id="content" tabindex="-1">{% block content %}{% endblock %}</main>
   <footer class="site-footer"><p>Compiled from saved research files. No models were run to generate this report.</p><p>Image evidence, proposed readings, and scholarly interpretation are presented separately.</p></footer>

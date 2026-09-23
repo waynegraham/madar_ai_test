@@ -18,6 +18,7 @@ from src.images import create_vlm_derivative, image_info
 from src.segmentation import alto_to_regions, vlm_json_to_regions
 from .experiment import SegmentationSystem, Disagreement, find_disagreements, select_disagreements, illustrate_experiment, system_name
 from .htr import HTRComparison, load_htr_comparisons, render_htr_crops
+from .overview import corpus_overview
 
 
 LABELS = {
@@ -290,7 +291,7 @@ def prepare_figures(report: ReportData, data_dir: Path, output_dir: Path) -> Non
                 report.issues.append(f"{source}: display image unavailable ({exc}).")
 
 
-def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None) -> ReportData:
+def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None, min_reviewed_pages: int = 5) -> ReportData:
     """Render local HTML/CSS. Output must be separate from all source data."""
     data_dir, output_dir = Path(data_dir).resolve(), Path(output_dir).resolve()
     assets = Path(assets).resolve() if assets else _asset_root().resolve()
@@ -304,16 +305,18 @@ def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None
         if existing and not marker.is_file():
             raise ValueError("Output directory is not empty and is not a previously generated report.")
     report = load_report_data(data_dir)
+    overview = corpus_overview(report, data_dir, min_reviewed_pages=min_reviewed_pages)
     environment = Environment(loader=FileSystemLoader(assets / "templates"),
                               autoescape=select_autoescape(["html", "xml"]))
     index_template = environment.get_template("index.html")
     page_template = environment.get_template("manuscript.html")
     method_template = environment.get_template("method.html")
+    overview_template = environment.get_template("overview.html")
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "manuscripts").mkdir(exist_ok=True)
     # Refuse symlink destinations rather than following them outside output.
     for destination in [output_dir / "static", output_dir / "manuscripts", marker,
-                        output_dir / "index.html", output_dir / "method.html"]:
+                        output_dir / "index.html", output_dir / "method.html", output_dir / "overview.html"]:
         if destination.is_symlink():
             raise ValueError(f"Refusing symlink output: {destination}")
     static_destination = output_dir / "static"
@@ -326,6 +329,8 @@ def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None
             shutil.copyfile(source, destination)
     (output_dir / "method.html").write_text(method_template.render(
         asset_prefix="", current_page="method", title="How this experiment works"), encoding="utf-8")
+    (output_dir / "overview.html").write_text(overview_template.render(
+        overview=overview, report=report, labels=LABELS, asset_prefix="", current_page="overview", title="Corpus overview"), encoding="utf-8")
     prepare_figures(report, data_dir, output_dir)
     filenames = []
     for manuscript in report.pages:
@@ -363,9 +368,10 @@ def main(argv: list[str] | None = None) -> int:
     build = subparsers.add_parser("build", help="Render a static HTML site")
     build.add_argument("--data", type=Path, default=Path("data"))
     build.add_argument("--output", type=Path, default=Path("reports/generated"))
+    build.add_argument("--min-reviewed-pages", type=int, default=5, help="Minimum paired, completely reviewed layout pages per run for aggregate metrics (default: 5; not a statistical guarantee)")
     args = parser.parse_args(argv)
     try:
-        report = build_report(args.data, args.output)
+        report = build_report(args.data, args.output, min_reviewed_pages=args.min_reviewed_pages)
     except (OSError, ValueError) as exc:
         parser.exit(1, f"Cannot build report: {exc}\n")
     print(f"Built {len(report.pages)} manuscript page(s): {args.output / 'index.html'}")
