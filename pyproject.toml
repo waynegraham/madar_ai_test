@@ -1,0 +1,27 @@
+[project]
+name = "madar-ai-test"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Wayne Graham", email = "wgraham@clir.org" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "jupyterlab>=4.6.4",
+    "lxml>=6.1.3",
+    "matplotlib>=3.11.2",
+    "openai>=3.19.0",
+    "pandas>=3.0.6",
+    "pillow>=12.3.0",
+    "pydantic>=2.13.5",
+    "requests>=2.34.2",
+    "shapely>=2.1.2",
+]
+
+[project.scripts]
+madar-ai-test = "madar_ai_test:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
