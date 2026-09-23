@@ -51,11 +51,6 @@
 <p class="scholarly-note">Human-corrected transcription: {{ 'available in the designated reference export; correction scope is not recorded.' if page.has_reviewed_text else 'unavailable.' }}</p>
 </section>
 {{ htr_component(page, labels) }}
-<section class="interpretation-section" aria-labelledby="why"><p class="eyebrow">Interpretation · future research</p><h2 id="why">Why this matters</h2>
-<p>Locating page features could eventually make them searchable across a larger manuscript corpus. A scholar might retrieve pages with proposed stamps or seals, compare marginal annotations, or bring together passages for closer reading.</p>
-<p>Finding a feature is only a first step. Establishing ownership, provenance, or waqf evidence requires reading the material in context and assessing it with scholarly expertise. The present comparisons do not establish those meanings.</p>
-<aside class="callout-question"><p>What could a corpus-wide index of page features help a scholar discover—and which connections would still require returning to the manuscript?</p></aside>
-</section>
 <section aria-labelledby="technical"><h2 id="technical">Technical details</h2>
 <details class="technical-details"><summary>Experiment records, processing information, and saved readings</summary>
 <p>All results were loaded from existing files. No model was run to produce this page. Display overlays use normalized 0–1000 bounding boxes mapped onto a proportionally resized source image. Source crops use original image coordinates. Input dimensions below describe the saved input file currently on disk, not independently verified run-time metadata.</p>
@@ -65,4 +60,5 @@
 </article>{% endfor %}
 </details>
 </section>
+{% include "corpus.html" %}
 {% endblock %}

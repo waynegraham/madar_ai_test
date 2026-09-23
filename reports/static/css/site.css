@@ -183,3 +183,23 @@ code { font-size: .88em; overflow-wrap: anywhere; }
 .method-glossary dt { font: 600 1rem/1.6 var(--sans); }
 .method-glossary dd { margin: .6rem 0 0; max-width: var(--measure); }
 .site-header { flex-wrap: wrap; }
+
+/* Corpus pathways are conceptual reading sequences, not working search controls. */
+.corpus-section { margin-top: 5rem; }
+.corpus-pathway { margin: 2.5rem 0; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.corpus-pathway h3 { margin-block: 0 .4rem; }
+.pathway-status { font: .77rem/1.6 var(--sans); color: var(--muted); }
+.research-path { display: flex; align-items: stretch; padding: 0; margin: 1.8rem 0; list-style: none; }
+.research-path li { flex: 1; min-width: 0; display: flex; align-items: center; gap: .8rem; font: 1.03rem/1.5 var(--serif); }
+.research-path li > span:first-child { flex: 1; padding-block: .8rem; border-block: 1px solid var(--rule); }
+.path-arrow { flex: 0 0 auto; margin-right: .8rem; color: var(--accent); font-size: 1.4rem; }
+.corpus-question { border-block: 3px double var(--accent); margin-top: 4rem; padding: 2.5rem 0; }
+.corpus-question-text { font: clamp(1.5rem, 3vw, 2.3rem)/1.5 var(--serif); max-width: 40ch; margin-bottom: 0; }
+.corpus-question-text > span { color: var(--accent); }
+@media (max-width: 850px) {
+  .research-path { display: block; }
+  .research-path li { flex-direction: column; align-items: start; gap: 0; }
+  .research-path li > span:first-child { min-width: 65%; }
+  .path-arrow { transform: rotate(90deg); margin: .2rem 0 .2rem 1rem; }
+}
+@media print { .corpus-pathway, .corpus-question { break-inside: avoid; } }

@@ -5,7 +5,7 @@
 <p class="eyebrow">Historical Arabic-script manuscripts</p>
 <h1>Manuscript images<br>and proposed readings</h1>
 <p class="lede">A working record of page layout, annotations, stamps and seals, and experiments in transcription. The manuscript image is the starting point for each inquiry.</p>
-<nav class="section-nav" aria-label="On this page"><a href="#manuscripts">The images</a><a href="#reading-guide">Reading this report</a><a href="#inventory">Reference material</a></nav>
+<nav class="section-nav" aria-label="On this page"><a href="#manuscripts">The images</a><a href="#reading-guide">Reading this report</a><a href="#inventory">Reference material</a><a href="#corpus-heading">From page to corpus</a></nav>
 </header>
 <section aria-labelledby="manuscripts" class="evidence-section">
 <div class="section-heading"><p class="eyebrow">Source evidence</p><h2 id="manuscripts">The manuscript images</h2></div>
@@ -35,8 +35,5 @@
 </tbody></table></div>{% else %}<p>Reference material unavailable.</p>{% endif %}
 </section>
 {% if report.issues %}<aside class="experimental-warning" aria-labelledby="data-issues"><h2 id="data-issues">Records needing attention</h2><p>Some files could not be included. Their absence must not be interpreted as a negative finding.</p><ul>{% for issue in report.issues %}<li>{{ issue }}</li>{% endfor %}</ul></aside>{% endif %}
-<section class="interpretation-section" aria-labelledby="open-questions"><p class="eyebrow">Interpretation · questions for further study</p><h2 id="open-questions">From observation to interpretation</h2>
-<aside class="callout-question"><p>What further reading and contextual evidence would be needed to connect a mark, annotation, or passage with ownership or waqf?</p></aside>
-<p>This is a research question, not a finding about these images. Waqf status, ownership, provenance, people, institutions, places, and dates have not been established by this report.</p>
-</section>
+{% include "corpus.html" %}
 {% endblock %}
