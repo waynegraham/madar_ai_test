@@ -148,3 +148,13 @@ code { font-size: .88em; overflow-wrap: anywhere; }
 @media (max-width: 1000px) { .segmentation-comparison { grid-template-columns: minmax(0, 1fr); } .disagreement-example { gap: 1.5rem; } }
 @media (max-width: 700px) { .segmentation-comparison, .disagreement-example { grid-template-columns: minmax(0, 1fr); } }
 @media print { .segmentation-comparison, .disagreement-example { display: block; } .segmentation-figure { break-inside: avoid; margin-bottom: 2rem; } }
+
+/* Compact, explicit system-by-system observations in both disagreement views. */
+.disagreement-example .comparison-observations { display: block; }
+.observation-label, .observation-relationship, .observation-context { display: block; }
+.observation-label { font-size: 1rem; }
+.observation-relationship, .observation-context { color: var(--muted); font-size: .8rem; margin-top: .3rem; }
+.human-review-heading { border-top: 1px solid var(--rule); padding-top: 1rem; }
+.all-disagreements { border-block: 1px solid var(--rule); margin-block: 2rem; padding-block: 1rem; }
+.all-disagreements > summary { color: var(--accent); cursor: pointer; font: 1rem/1.6 var(--sans); padding: .5rem 0; }
+.disagreement-provenance { font-size: .8rem; }

@@ -785,3 +785,29 @@ involved. Default figures are unaffected by changes to undisplayed confidence.
 
 The report builder automatically uses this renderer for segmentation figures in
 `reports/generated/assets/`. Source manuscript images are never overwritten.
+
+### Inspecting every disagreement
+
+The reusable component in `reports/templates/disagreements.html` presents one
+crop with a row per prediction system and a separate **Human review** row.
+Without a human-reviewed reference it explicitly says **Not yet available**.
+Reference labels, when available, are shown as evidence without automatically
+judging a prediction right or wrong.
+
+`find_disagreements(systems, labels, limit=None)` returns the complete pairwise
+list: every geometrically matched region with differing types and every
+unmatched region, using the existing IoU matcher. `select_disagreements(...)`
+selects at most four spatially varied examples for the main narrative. The
+**Inspect all … pairwise disagreements** disclosure includes the complete list,
+including repeated features compared across different pairs of systems.
+
+Rows preserve the actual pairwise assignments. An unmatched region remains
+**No matched region** even when a differently grouped box overlaps it; contextual
+overlap is explained separately. Other systems and reviewed references are
+compared independently with the crop area at IoU ≥ 0.5. Comparison source paths,
+region identifiers, crop bounds, and overlaps are available in a disclosure.
+
+Disagreement crops retain native pixels from the original TIFF (preferred when
+multiple source formats are present), with up to 30 pixels of edge-clamped
+padding. Each crop links to that full-resolution PNG. A separate preview is
+limited to 900 pixels for inline display; no model inference is involved.

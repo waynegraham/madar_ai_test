@@ -16,7 +16,7 @@ from src.alto import load_alto
 from src.annotation import load_annotations
 from src.images import create_vlm_derivative, image_info
 from src.segmentation import alto_to_regions, vlm_json_to_regions
-from .experiment import SegmentationSystem, Disagreement, find_disagreements, illustrate_experiment, system_name
+from .experiment import SegmentationSystem, Disagreement, find_disagreements, select_disagreements, illustrate_experiment, system_name
 
 
 LABELS = {
@@ -62,6 +62,7 @@ class Manuscript:
     figures: list[ManuscriptImage] = field(default_factory=list)
     segmentations: list[SegmentationSystem] = field(default_factory=list)
     disagreements: list[Disagreement] = field(default_factory=list)
+    all_disagreements: list[Disagreement] = field(default_factory=list)
 
     @property
     def predictions(self) -> list[SegmentationSystem]:
@@ -239,8 +240,10 @@ def load_report_data(data_dir: Path) -> ReportData:
         except Exception as exc:
             issues.append(f"{relative(path)}: could not load saved experiment ({exc}).")
     for manuscript in pages.values():
+        manuscript.images.sort(key=lambda name: (Path(name).suffix.lower() not in {".tif", ".tiff"}, name))
         manuscript.segmentations.sort(key=lambda s: (s.reviewed, {"eScriptorium": 0, "Qwen3-VL 8B": 1, "Qwen3-VL 30B": 2}.get(s.name, 3), s.source))
-        manuscript.disagreements = find_disagreements(manuscript.segmentations, LABELS)
+        manuscript.all_disagreements = find_disagreements(manuscript.segmentations, LABELS, limit=None)
+        manuscript.disagreements = select_disagreements(manuscript.all_disagreements)
     return ReportData([pages[key] for key in sorted(pages)], issues)
 
 
@@ -318,7 +321,7 @@ def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None
     for manuscript in report.pages:
         if manuscript.figures:
             try:
-                illustrate_experiment(manuscript.segmentations, manuscript.disagreements,
+                illustrate_experiment(manuscript.segmentations, manuscript.all_disagreements,
                                       data_dir / manuscript.figures[0].source, output_dir)
             except (OSError, ValueError) as exc:
                 report.issues.append(f"{manuscript.id}: some experiment illustrations are unavailable ({exc}).")

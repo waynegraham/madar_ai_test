@@ -152,7 +152,8 @@ assert "openai" not in sys.modules
         differences = find_disagreements(systems, {})
         self.assertEqual(len(differences), 1)
         self.assertIn("overlapping region", differences[0].heading)
-        self.assertEqual([name for name, _ in differences[0].observations], ["One", "Two"])
+        self.assertEqual([o.system for o in differences[0].observations], ["One", "Two"])
+        self.assertEqual(differences[0].human_review[0].label, "stamp_or_seal")
         self.assertEqual(find_disagreements([systems[0], SegmentationSystem("Same", "same", [a])], {}), [])
 
     def test_corrected_alto_is_required_for_review_section(self):

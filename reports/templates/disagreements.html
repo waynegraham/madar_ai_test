@@ -1,0 +1,50 @@
+{# Reusable disagreement evidence: no correctness claims are inferred. #}
+{% macro disagreement_example(item, page, prefix, asset_prefix='../') -%}
+<article class="disagreement-example" aria-labelledby="{{ prefix }}-{{ item.identifier }}">
+  {% if item.crop %}
+  <figure class="manuscript-figure disagreement-crop">
+    <a class="figure-link" href="{{ asset_prefix }}{{ item.crop }}" aria-label="Open original-resolution crop for {{ item.heading }}">
+      <img src="{{ asset_prefix }}{{ item.crop_preview or item.crop }}" alt="Manuscript {{ page.id }}: the crop discussed in the comparison between {{ item.pair|join(' and ') }}." width="{{ item.crop_width }}" height="{{ item.crop_height }}" loading="lazy">
+    </a>
+    <figcaption class="figure-caption">Cropped from <code>{{ page.figures[0].source }}</code>, with up to 30 source-image pixels of context at each edge. <a href="{{ asset_prefix }}{{ item.crop }}">Inspect the original-resolution crop</a> ({{ item.crop_width }} × {{ item.crop_height }} pixels).</figcaption>
+  </figure>
+  {% else %}<p class="image-unavailable">Original-image crop unavailable.</p>{% endif %}
+  <div>
+    <p class="eyebrow">{{ item.pair|join(' / ') }}</p>
+    <h3 id="{{ prefix }}-{{ item.identifier }}">{{ item.heading }}</h3>
+    <p>{{ item.explanation }}</p>
+    <dl class="comparison-observations">
+      {% for observation in item.observations %}
+      <dt>{{ observation.system }}</dt>
+      <dd><span class="observation-label">{{ observation.label }}</span>
+        <span class="observation-relationship">{{ observation.relationship }}.</span>
+        {% if observation.context %}<span class="observation-context">{{ observation.context }}</span>{% endif %}
+      </dd>
+      {% endfor %}
+      <dt class="human-review-heading">Human review</dt>
+      <dd>{% if item.human_review %}{% for review in item.human_review %}
+        <span class="observation-label">{{ review.label }}</span>
+        <span class="observation-relationship">{{ review.system }}: {{ review.relationship }}.</span>
+        {% if review.context %}<span class="observation-context">{{ review.context }}</span>{% endif %}
+      {% endfor %}{% else %}<span class="review-pending-label">Not yet available</span>{% endif %}</dd>
+    </dl>
+    <details class="technical-details disagreement-provenance"><summary>Comparison coordinates and sources</summary>
+      <p>Crop area before padding, normalized 0–1000: <code>{{ item.bbox }}</code>. The systems named in the comparison heading define this pairwise comparison. Other systems are compared independently with its crop area.</p>
+      <ul>{% for observation in item.observations + item.human_review %}<li>{{ observation.system }}: <code>{{ observation.source }}</code>{% if observation.region_id %}; region <code>{{ observation.region_id }}</code>{% endif %}{% if observation.overlap is not none %}; overlap with crop area {{ '%.3f'|format(observation.overlap) }}{% endif %}.</li>{% endfor %}</ul>
+      <p>Overlap with the crop area is descriptive, not a correctness score. For a label conflict, the crop area is the union bounding box of the two matched regions.</p>
+    </details>
+  </div>
+</article>
+{%- endmacro %}
+
+{% macro disagreement_component(page) -%}
+{% if page.all_disagreements %}
+<p>{{ page.disagreements|length }} examples are selected below from {{ page.all_disagreements|length }} pairwise disagreements. Comparisons can refer to the same feature more than once when different pairs of systems are involved.</p>
+{% for item in page.disagreements %}{{ disagreement_example(item, page, 'selected') }}{% endfor %}
+<details class="all-disagreements">
+  <summary>Inspect all {{ page.all_disagreements|length }} pairwise disagreements</summary>
+  <p>This complete list includes the selected examples, repeated features across system pairs, and small regions excluded from the short selection. All comparisons use the same overlap rule.</p>
+  {% for item in page.all_disagreements %}{{ disagreement_example(item, page, 'all') }}{% endfor %}
+</details>
+{% else %}<p>{{ 'No label differences or unmatched boxes were found by this comparison rule.' if page.predictions|length > 1 else 'At least two saved segmentation results are needed to identify disagreements.' }}</p>{% endif %}
+{%- endmacro %}
