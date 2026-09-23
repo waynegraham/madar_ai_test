@@ -14,6 +14,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from src.alto import load_alto
 from src.annotation import load_annotations
+from src.images import create_vlm_derivative, image_info
 from src.segmentation import vlm_json_to_regions
 
 
@@ -42,11 +43,22 @@ class Artifact:
 
 
 @dataclass
+class ManuscriptImage:
+    source: str
+    preview: str
+    thumbnail: str
+    width: int
+    height: int
+    alt: str
+
+
+@dataclass
 class Manuscript:
     """One image/page, not necessarily an entire codex."""
     id: str
     images: list[str] = field(default_factory=list)
     artifacts: list[Artifact] = field(default_factory=list)
+    figures: list[ManuscriptImage] = field(default_factory=list)
 
     @property
     def filename(self) -> str:
@@ -192,10 +204,39 @@ def load_report_data(data_dir: Path) -> ReportData:
 
 
 def _asset_root() -> Path:
+    repository_assets = Path(__file__).resolve().parents[2] / "reports"
+    if (repository_assets / "templates" / "base.html").is_file():
+        return repository_assets
     packaged = Path(__file__).parent / "report_assets"
     if packaged.is_dir():
         return packaged
-    return Path(__file__).resolve().parents[2] / "reports"
+    return repository_assets
+
+
+def prepare_figures(report: ReportData, data_dir: Path, output_dir: Path) -> None:
+    """Make whole-page display copies; never crop, annotate, or change originals."""
+    destination_dir = output_dir / "images"
+    if destination_dir.is_symlink():
+        raise ValueError(f"Refusing symlink output: {destination_dir}")
+    destination_dir.mkdir(exist_ok=True)
+    for manuscript in report.pages:
+        for source in manuscript.images:
+            image_id = hashlib.sha256(source.encode()).hexdigest()[:20]
+            preview = f"images/{image_id}.png"
+            thumbnail = f"images/{image_id}-small.png"
+            for relative in (preview, thumbnail):
+                if (output_dir / relative).is_symlink():
+                    raise ValueError(f"Refusing symlink output: {relative}")
+            try:
+                create_vlm_derivative(data_dir / source, output_dir / preview, max_dimension=1800)
+                create_vlm_derivative(data_dir / source, output_dir / thumbnail, max_dimension=640)
+                info = image_info(output_dir / preview)
+                manuscript.figures.append(ManuscriptImage(
+                    source, preview, thumbnail, info.width, info.height,
+                    f"Full manuscript page, image identifier {manuscript.id}. An unannotated reproduction of the source image.",
+                ))
+            except (OSError, ValueError) as exc:
+                report.issues.append(f"{source}: display image unavailable ({exc}).")
 
 
 def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None) -> ReportData:
@@ -231,6 +272,7 @@ def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None
                 raise ValueError(f"Refusing symlink output: {destination}")
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, destination)
+    prepare_figures(report, data_dir, output_dir)
     filenames = []
     for manuscript in report.pages:
         destination = output_dir / "manuscripts" / manuscript.filename

@@ -4,6 +4,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from PIL import Image
+from lxml import html as html_parser
 
 from src.waqf_vlm.report import build_report, load_report_data
 
@@ -84,6 +86,43 @@ class ReportTests(unittest.TestCase):
     def test_empty_report(self):
         build_report(self.data, self.output)
         self.assertIn("No manuscript images", (self.output / "index.html").read_text())
+
+    def test_publication_figures_preserve_source_and_accessible_structure(self):
+        image_path = self.data / "images" / "page.tif"
+        image_path.parent.mkdir()
+        Image.new("RGB", (1000, 2000), "beige").save(image_path)
+        original = image_path.read_bytes()
+        self.write("alto/page.xml", ALTO)
+        report = build_report(self.data, self.output)
+        figure = report.pages[0].figures[0]
+        self.assertEqual((figure.width, figure.height), (900, 1800))
+        with Image.open(self.output / figure.thumbnail) as thumbnail:
+            self.assertEqual(thumbnail.size, (320, 640))
+        self.assertEqual(original, image_path.read_bytes())
+        for path in self.output.rglob("*.html"):
+            document = html_parser.fromstring(path.read_text())
+            for image in document.xpath('//img'):
+                self.assertTrue(image.get('alt'))
+                self.assertTrue(image.xpath('ancestor::figure/figcaption'))
+                self.assertTrue((path.parent / image.get('src')).is_file())
+            for table in document.xpath('//table'):
+                self.assertTrue(table.xpath('caption'))
+                self.assertTrue(table.xpath('thead/tr/th[@scope="col"]'))
+            for details in document.xpath('//details'):
+                self.assertTrue(details.xpath('summary'))
+            for href in document.xpath('//@href'):
+                if href.startswith('#'):
+                    self.assertTrue(document.xpath('//*[@id=$target]', target=href[1:]))
+                else:
+                    self.assertTrue((path.parent / href).is_file())
+
+    def test_unreadable_source_image_is_not_invented(self):
+        self.write("images/page.tif", "broken image")
+        report = build_report(self.data, self.output)
+        self.assertFalse(report.pages[0].figures)
+        self.assertIn("display image unavailable", report.issues[0])
+        page_html = (self.output / 'manuscripts' / report.pages[0].filename).read_text()
+        self.assertIn("Image reproduction unavailable", page_html)
 
     def test_cli_has_no_inference_imports_or_network(self):
         code = '''import sys

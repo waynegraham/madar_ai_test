@@ -1,25 +1,42 @@
 {% extends "base.html" %}
+{% from "components.html" import manuscript_figure %}
 {% block content %}
+<header class="page-heading">
 <p class="eyebrow">Historical Arabic-script manuscripts</p>
-<h1>Reading the page, tracing the evidence</h1>
-<p class="lede">A working record of experiments in identifying text, annotations, stamps and seals, and transcribing manuscript passages.</p>
+<h1>Manuscript images<br>and proposed readings</h1>
+<p class="lede">A working record of page layout, annotations, stamps and seals, and experiments in transcription. The manuscript image is the starting point for each inquiry.</p>
+<nav class="section-nav" aria-label="On this page"><a href="#manuscripts">The images</a><a href="#reading-guide">Reading this report</a><a href="#inventory">Reference material</a></nav>
+</header>
+<section aria-labelledby="manuscripts" class="evidence-section">
+<div class="section-heading"><p class="eyebrow">Source evidence</p><h2 id="manuscripts">The manuscript images</h2></div>
+<p class="scholarly-note">Each entry represents one image, not necessarily a complete manuscript. File identifiers are retained where catalogue descriptions are unavailable.</p>
+{% if report.pages %}<div class="manuscript-gallery">
+{% for page in report.pages %}
+<article class="manuscript-entry">
+{% if page.figures %}{{ manuscript_figure(page.figures[0], '', loop.index, compact=true, detail_url='manuscripts/' ~ page.filename) }}{% else %}<p class="image-unavailable">Image reproduction unavailable.</p>{% endif %}
+<h3><a href="manuscripts/{{ page.filename }}">{{ page.id }}</a></h3>
+<p class="entry-note">{{ 'Human layout annotations are available; see the review notes.' if page.has_human_layout else 'Human layout reference unavailable.' }}</p>
+</article>
+{% endfor %}</div>{% else %}<p>No manuscript images or saved experiment records were found.</p>{% endif %}
+</section>
 <section aria-labelledby="reading-guide">
-<h2 id="reading-guide">How to read this report</h2>
-<p>Each entry below represents one manuscript image. A file identifier is not a catalogue description, and several images may belong to the same manuscript.</p>
-<dl class="guide">
-<div><dt>Human reviewed</dt><dd>Human-corrected material explicitly stored as ground truth. The report identifies any missing information about the reviewer or scope of corrections.</dd></div>
-<div><dt>Machine suggested</dt><dd>A proposed reading or identification from a model, including machine-generated eScriptorium output. It is not an established finding.</dd></div>
-<div><dt>Not yet reviewed</dt><dd>No completed human review is recorded. Human-drawn layout annotations are identified separately; they do not establish an independently reviewed transcription.</dd></div>
+<div class="section-heading"><p class="eyebrow">Editorial conventions</p><h2 id="reading-guide">Reading this report</h2></div>
+<p>The image is evidence. A model’s transcription or identification is a proposal about that evidence. Review labels describe the status recorded in the research files, not a judgment about the quality of a reading.</p>
+<dl class="reading-guide">
+<div><dt><span class="human-reviewed-label">Human reviewed</span></dt><dd>Human-corrected material explicitly stored as ground truth. Missing information about the reviewer or scope of corrections is noted.</dd></div>
+<div><dt><span class="model-label">Machine suggested</span></dt><dd>A proposed reading or identification, including machine-generated eScriptorium output. It is not an established finding.</dd></div>
+<div><dt><span class="review-pending-label">Not yet reviewed</span></dt><dd>No completed review is recorded. Human-drawn regions are identified separately; they do not establish an independently reviewed transcription.</dd></div>
 </dl>
-<p>Counts describe what was recorded, not how accurately a system understood the page. Missing evidence is shown as unavailable.</p>
+<aside class="experimental-warning"><p><strong>Experimental material.</strong> Recorded region counts are inventories, not measures of accuracy. Unavailable evidence is never presented as a negative finding.</p></aside>
 </section>
-<section aria-labelledby="inventory"><h2 id="inventory">Manuscript images <span class="muted">({{ report.pages|length }})</span></h2>
-{% if report.pages %}
-<div class="table-wrap"><table><thead><tr><th scope="col">Image identifier</th><th scope="col">Saved records</th><th scope="col">Human layout reference</th><th scope="col">Human-corrected text</th></tr></thead><tbody>
-{% for page in report.pages %}<tr><th scope="row"><a href="manuscripts/{{ page.filename }}">{{ page.id }}</a></th><td>{{ page.artifacts|length }}</td><td>{{ "Available; see review notes" if page.has_human_layout else "Unavailable" }}</td><td>{{ "Available; see correction scope" if page.has_reviewed_text else "Unavailable" }}</td></tr>{% endfor %}
-</tbody></table></div>
-{% else %}<p>No manuscript images or saved experiment records were found.</p>{% endif %}
+<section aria-labelledby="inventory"><h2 id="inventory">Reference material</h2>
+{% if report.pages %}<div class="table-wrap" role="region" aria-label="Reference material comparison" tabindex="0"><table class="comparison-table"><caption>Availability of human reference material by manuscript image</caption><thead><tr><th scope="col">Image identifier</th><th scope="col">Human layout reference</th><th scope="col">Human-corrected text</th></tr></thead><tbody>
+{% for page in report.pages %}<tr><th scope="row"><a href="manuscripts/{{ page.filename }}">{{ page.id }}</a></th><td>{{ "Available; see review notes" if page.has_human_layout else "Unavailable" }}</td><td>{{ "Available; see correction scope" if page.has_reviewed_text else "Unavailable" }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<p>Reference material unavailable.</p>{% endif %}
 </section>
-{% if report.issues %}<section class="notice"><h2>Records needing attention</h2><p>Some files could not be included. Their absence must not be interpreted as a negative finding.</p><ul>{% for issue in report.issues %}<li>{{ issue }}</li>{% endfor %}</ul></section>{% endif %}
-<section><h2>What is not established yet</h2><p>This foundation does not calculate accuracy or establish waqf status, ownership, provenance, people, institutions, places, or dates. Such conclusions require suitable evidence and scholarly review.</p></section>
+{% if report.issues %}<aside class="experimental-warning" aria-labelledby="data-issues"><h2 id="data-issues">Records needing attention</h2><p>Some files could not be included. Their absence must not be interpreted as a negative finding.</p><ul>{% for issue in report.issues %}<li>{{ issue }}</li>{% endfor %}</ul></aside>{% endif %}
+<section class="interpretation-section" aria-labelledby="open-questions"><p class="eyebrow">Interpretation · questions for further study</p><h2 id="open-questions">From observation to interpretation</h2>
+<aside class="callout-question"><p>What further reading and contextual evidence would be needed to connect a mark, annotation, or passage with ownership or waqf?</p></aside>
+<p>This is a research question, not a finding about these images. Waqf status, ownership, provenance, people, institutions, places, and dates have not been established by this report.</p>
+</section>
 {% endblock %}

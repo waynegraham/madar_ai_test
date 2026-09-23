@@ -683,9 +683,40 @@ origin and review status.
 
 The foundation lists saved region counts, ALTO text, and saved HTR/script/language
 suggestions. It does not compute accuracy, infer semantic findings, copy original
-images, or invent missing metadata. Invalid records appear in a data-quality
+TIFFs, or invent missing metadata. Proportional PNG display copies (at most 1800
+pixels on the longer edge, with 640-pixel thumbnails) are generated from source
+images for publication. Invalid records appear in a data-quality
 notice; unavailable references are explicitly marked. A manuscript detail page
 represents one source image, not necessarily a complete manuscript.
+
+### Publication design
+
+Manuscript images lead the index and detail pages. Warm paper tones, dark text,
+serif reading typography, and one muted green accent keep the presentation
+focused on the source material. No remote fonts, animation, or JavaScript are
+required. Desktop and tablet layouts adapt to a single column on narrow screens.
+
+`reports/templates/components.html` provides reusable manuscript figures and
+review labels. Figure descriptions come from `ManuscriptImage.alt`; the default
+identifies the image without inventing a description of its contents. Captions
+name the source file and describe the display transformation. Catalogue metadata
+and image credits remain explicitly unavailable until supplied by the research
+data; a local source filename is not presented as collection provenance.
+
+Reusable CSS components in `reports/static/css/site.css` include:
+
+- `.manuscript-figure`, `.figure-caption`, and `.provenance` for visual evidence.
+- `.scholarly-note` and `.experimental-warning` for editorial context and limits.
+- `.model-label`, `.human-reviewed-label`, and `.review-pending-label` for status.
+- `.comparison-table` within a keyboard-focusable `.table-wrap` for inventories.
+- `.technical-details` on native `details`/`summary` elements for disclosures.
+- `.callout-question` within `.interpretation-section` for open research questions.
+
+Machine suggestions use dashed rules, human reference material uses solid rules,
+and interpretation has a separate labeled section. These distinctions do not
+depend on color alone. Images preserve their full extent, text readings retain
+line breaks and automatic text direction, and skip links and visible focus
+indicators support keyboard navigation.
 
 Run focused checks with:
 

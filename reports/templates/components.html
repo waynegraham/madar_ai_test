@@ -1,0 +1,20 @@
+{# Reusable publication components. Captions and alt text have different jobs. #}
+{% macro manuscript_figure(figure, prefix, number, compact=false, detail_url=none) -%}
+<figure class="manuscript-figure {{ 'manuscript-figure--compact' if compact else '' }}">
+  <a class="figure-link" href="{{ detail_url if detail_url else prefix ~ figure.preview }}" aria-label="{{ 'Read the record for this manuscript image' if compact else 'Open the larger manuscript image' }}">
+    <img src="{{ prefix }}{{ figure.thumbnail if compact else figure.preview }}"
+         width="{{ figure.width }}" height="{{ figure.height }}" alt="{{ figure.alt }}" loading="{{ 'lazy' if compact else 'eager' }}" decoding="async">
+  </a>
+  <figcaption class="figure-caption"><span class="caption-label">Figure {{ number }}.</span>
+    {{ 'Manuscript image. ' if compact else 'Full-page reproduction. Select the image to examine a larger copy. ' }}
+    <span class="provenance">Source: <code>{{ figure.source }}</code>. Display copy reduced proportionally; no regions or readings have been added.</span>
+  </figcaption>
+</figure>
+{%- endmacro %}
+
+{% macro review_labels(artifact) -%}
+<div class="labels" aria-label="Origin and review status">
+  {% if artifact.role == 'prediction' %}<span class="model-label">Machine suggested</span>{% else %}<span class="reference-label">Human reference material</span>{% endif %}
+  <span class="{{ 'human-reviewed-label' if artifact.review == 'Human reviewed' else 'review-pending-label' }}">{{ artifact.review }}</span>
+</div>
+{%- endmacro %}

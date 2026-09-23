@@ -1,24 +1,41 @@
 {% extends "base.html" %}
+{% from "components.html" import manuscript_figure, review_labels %}
 {% block content %}
-<nav aria-label="Breadcrumb"><a href="../index.html">All manuscript images</a></nav>
-<p class="eyebrow">Manuscript image</p><h1>{{ page.id }}</h1>
-<p class="lede">Recorded observations and suggested readings for this image. Catalogue title, date, place, and collection description are unavailable in the report data.</p>
-<section><h2>Source and reference material</h2>
-{% if page.images %}<p>Source image files:</p><ul>{% for image in page.images %}<li><code>{{ image }}</code></li>{% endfor %}</ul><p class="muted">Original images are not copied into this report.</p>{% else %}<p>Source image: unavailable.</p>{% endif %}
+<nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">All manuscript images</a></nav>
+<header class="page-heading">
+<p class="eyebrow">Manuscript image</p><h1 class="manuscript-identifier">{{ page.id }}</h1>
+<p class="lede">The source image and its recorded readings, presented for examination.</p>
+<nav class="section-nav" aria-label="On this page"><a href="#source-evidence">Image &amp; provenance</a><a href="#recorded-readings">Recorded readings</a><a href="#interpretation">Open questions</a></nav>
+</header>
+<section class="evidence-section" aria-labelledby="source-evidence">
+<div class="section-heading"><p class="eyebrow">Source evidence</p><h2 id="source-evidence">Image &amp; provenance</h2></div>
+<div class="image-and-provenance">
+<div>{% for figure in page.figures %}{{ manuscript_figure(figure, '../', loop.index) }}{% else %}<p class="image-unavailable">Image reproduction unavailable.</p>{% endfor %}</div>
+<aside class="provenance-note" aria-label="Image provenance and reference material">
+<h3>About this image</h3><p>Catalogue title, date, place, collection description, and image credit are unavailable in the report data.</p>
+{% if page.images %}<h4>Source files</h4><ul class="source-files">{% for image in page.images %}<li><code>{{ image }}</code></li>{% endfor %}</ul><p>Display copies preserve the whole page. Original image files remain unchanged.</p>{% else %}<p>Source image: unavailable.</p>{% endif %}
+<h4>Reference material</h4>
 <p>Human layout reference: {{ "available; review and completeness notes appear below." if page.has_human_layout else "unavailable." }}</p>
 <p>Human-corrected transcription: {{ "available in the designated reference export; correction scope is not recorded." if page.has_reviewed_text else "unavailable." }}</p>
+</aside>
+</div>
 </section>
-<section><h2>Saved observations</h2>
+<section class="readings-section" aria-labelledby="recorded-readings">
+<div class="section-heading"><p class="eyebrow">Recorded observations &amp; proposed readings</p><h2 id="recorded-readings">Reading the manuscript</h2></div>
+<p class="scholarly-note">Readings below retain their recorded wording and line breaks. Machine suggestions are separated from human reference material. Their appearance here does not verify their accuracy.</p>
 {% for artifact in page.artifacts %}
-<article class="record">
-<div class="badges"><span class="badge {{ 'reviewed' if artifact.review == 'Human reviewed' else '' }}">{{ artifact.review }}</span><span class="badge">{{ "Machine suggested" if artifact.role == "prediction" else "Human reference material" }}</span></div>
-<h3>{{ artifact.kind }}</h3><p class="origin">{{ artifact.origin }}</p>
-{% for note in artifact.notes %}<p>{{ note }}</p>{% endfor %}
-{% if artifact.counts %}<h4>Recorded regions</h4><ul>{% for label, count in artifact.counts.items() %}<li>{{ label }}: {{ count }}</li>{% endfor %}</ul>{% endif %}
-{% if artifact.transcriptions %}<h4>{{ "Reference text" if artifact.role == "reference" else "Suggested text — not a verified reading" }}</h4>{% for text in artifact.transcriptions %}<div class="transcription" dir="auto">{{ text }}</div>{% endfor %}{% elif artifact.kind == "Transcription, script and language" %}<p>Transcription: unavailable.</p>{% endif %}
-<details><summary>Record details and source</summary><dl>{% for key, value in artifact.details.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}<dt>Saved file (relative to data directory)</dt><dd><code>{{ artifact.path }}</code></dd></dl></details>
+<article class="research-record {{ 'research-record--suggested' if artifact.role == 'prediction' else 'research-record--reference' }}" aria-labelledby="record-{{ loop.index }}">
+<header>{{ review_labels(artifact) }}<h3 id="record-{{ loop.index }}">{{ artifact.kind }}</h3><p class="record-origin">Source: <span class="model-name">{{ artifact.origin }}</span></p></header>
+{% for note in artifact.notes %}<p class="scholarly-note">{{ note }}</p>{% endfor %}
+{% if artifact.counts %}<div class="table-wrap" role="region" aria-label="Recorded region inventory {{ loop.index }}" tabindex="0"><table class="comparison-table region-inventory"><caption>Recorded regions — an inventory, not an accuracy assessment</caption><thead><tr><th scope="col">Region description</th><th scope="col">Recorded count</th></tr></thead><tbody>{% for label, count in artifact.counts.items() %}<tr><th scope="row">{{ label }}</th><td>{{ count }}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
+{% if artifact.transcriptions %}<h4>{{ "Reference text" if artifact.role == "reference" else "Suggested text — not a verified reading" }}</h4><div class="reading-text">{% for text in artifact.transcriptions %}<div class="transcription" dir="auto">{{ text }}</div>{% endfor %}</div>{% elif artifact.kind == "Transcription, script and language" %}<p>Transcription: unavailable.</p>{% endif %}
+<details class="technical-details"><summary>Technical details &amp; saved source</summary><dl>{% for key, value in artifact.details.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}<dt>Saved file (relative to data directory)</dt><dd><code>{{ artifact.path }}</code></dd></dl></details>
 </article>
 {% else %}<p>No readable experiment or annotation records are available for this image.</p>{% endfor %}
 </section>
-<section><h2>Interpretation remains open</h2><p>Accuracy has not been calculated in this report. Waqf evidence, ownership, provenance, people, institutions, places, and dates have not been assessed here. An absence of recorded analysis does not mean an absence of evidence in the manuscript.</p></section>
+<section class="interpretation-section" aria-labelledby="interpretation"><p class="eyebrow">Interpretation · questions for further study</p><h2 id="interpretation">What remains open</h2>
+<aside class="callout-question"><p>Which suggested readings can be supported by the visible manuscript, and which require closer examination?</p></aside>
+<p>Accuracy has not been calculated in this report. Waqf evidence, ownership, provenance, people, institutions, places, and dates have not been assessed here.</p>
+<aside class="experimental-warning"><p><strong>A limit of this record.</strong> An absence of recorded analysis does not mean an absence of evidence in the manuscript.</p></aside>
+</section>
 {% endblock %}
