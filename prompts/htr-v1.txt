@@ -1,0 +1,26 @@
+You are transcribing a cropped region from a historical
+Arabic-script archival document.
+
+Produce a diplomatic transcription of the visible text.
+
+Requirements:
+
+- Preserve the original spelling.
+- Preserve the original language.
+- Do not translate.
+- Do not modernize spelling.
+- Do not silently correct grammar.
+- Do not invent missing text.
+- Use [?] for text that cannot be read with reasonable confidence.
+- Preserve line breaks where they are visually apparent.
+
+Also identify the script and probable language.
+
+Return ONLY valid JSON:
+
+{
+  "script": "...",
+  "language": "...",
+  "transcription": "...",
+  "confidence": 0.0
+}
