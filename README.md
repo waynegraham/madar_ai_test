@@ -1,0 +1,630 @@
+# Waqf VLM
+
+Experimental tooling for evaluating vision-language models (VLMs) on historical Arabic-script archival documents, with particular attention to **document segmentation, handwritten text recognition (HTR), language identification, stamps and seals, annotations, and waqf-related content**.
+
+The project is intended to support the development of a human-verified dataset that can eventually be used for benchmarking, model evaluation, and an AI challenge focused on historical document understanding.
+
+## Research Goals
+
+Historical archival documents often contain multiple overlapping layers of information:
+
+* Primary document text
+* Marginal text
+* Handwritten annotations
+* Stamps and seals
+* Later archival or cataloguing marks
+* Multiple scripts or languages
+* Waqf/endowment statements and other semantic information
+
+Traditional HTR pipelines generally treat layout analysis and text recognition as separate tasks and may have difficulty distinguishing these layers or interpreting their function.
+
+This project explores whether modern VLMs can complement specialist tools such as eScriptorium by performing several distinct tasks:
+
+1. **Document segmentation**
+2. **Region classification**
+3. **Script and language identification**
+4. **Handwritten text recognition**
+5. **Semantic classification**
+6. **Identification of waqf-related evidence**
+
+These tasks are intentionally evaluated separately. For example, recognizing that an object is a seal is a visual segmentation/classification problem, while determining that a text region provides evidence of waqf status is a semantic interpretation problem.
+
+## Initial Experimental Pipeline
+
+```text
+Original TIFF
+      │
+      ├───────────────┐
+      │               │
+      ▼               ▼
+eScriptorium      VLM derivative
+ALTO XML              PNG
+      │               │
+      │               ▼
+      │          Vision-language model
+      │               │
+      │               ▼
+      │          detected regions
+      │               │
+      │               ▼
+      │       crop original TIFF
+      │               │
+      │               ▼
+      │          HTR / language ID
+      │               │
+      │               ▼
+      │      semantic classification
+      │               │
+      └───────┬───────┘
+              ▼
+         evaluation
+              │
+              ▼
+       human verification
+```
+
+The original TIFF is always treated as the authoritative image. Smaller PNG derivatives may be generated for whole-page VLM analysis, but region crops for HTR are taken from the original TIFF whenever possible.
+
+## Experimental Tasks
+
+### 1. Segmentation
+
+Given a complete page image, identify visually distinct document regions.
+
+Initial region vocabulary:
+
+* `main_text`
+* `marginal_text`
+* `stamp_or_seal`
+* `handwritten_annotation`
+* `archival_mark`
+* `illustration`
+* `unknown`
+
+The initial segmentation task should be based only on visually observable evidence. It should not attempt to identify waqf content.
+
+### 2. Script and Language Identification
+
+For each text-bearing region, identify where possible:
+
+* Script
+* Probable language
+* Confidence or uncertainty
+
+For the initial corpus this may include Arabic-script material in languages such as Arabic and Ottoman Turkish.
+
+Script and language should be recorded separately.
+
+### 3. HTR
+
+Text-bearing regions are cropped from the original high-resolution TIFF and submitted independently for transcription.
+
+The goal is a **diplomatic transcription** rather than modernization or semantic correction.
+
+Models should be instructed to preserve uncertainty rather than invent plausible text.
+
+### 4. Semantic Classification
+
+Semantic analysis occurs after segmentation and HTR.
+
+Possible semantic classes may eventually include:
+
+* Waqf/endowment
+* Ownership/provenance
+* Personal name
+* Place
+* Institution
+* Date
+* Administrative annotation
+* Cataloguing or archival mark
+* Other
+* Uncertain
+
+This vocabulary is experimental and should evolve through examination of the corpus and expert annotation.
+
+### 5. Waqf Identification
+
+`waqf` is deliberately **not treated as a visual segmentation class**.
+
+Evidence of waqf status might occur in:
+
+* Main document text
+* Marginal annotations
+* Seals
+* Stamps
+* Formulaic language
+* Multiple regions considered together
+
+Waqf detection is therefore treated as a semantic document-understanding task.
+
+## Models
+
+The initial experiments use Qwen3-VL running locally on Apple Silicon.
+
+Models currently under consideration include:
+
+* Qwen3-VL-8B-Instruct
+* Qwen3-VL-30B-A3B-Instruct
+
+The initial local environment uses MLX models through LM Studio.
+
+LM Studio acts as an inference server:
+
+```text
+Python / Jupyter
+       │
+       │ HTTP
+       ▼
+localhost:1234
+       │
+       ▼
+LM Studio
+       │
+       ▼
+Qwen3-VL
+       │
+       ▼
+Apple Silicon GPU
+```
+
+This separates the experimental code from the inference backend. The same evaluation pipeline can later be used with direct MLX inference, CUDA-hosted models, or external APIs.
+
+## Project Structure
+
+```text
+waqf-vlm/
+├── notebooks/
+│   ├── 01_vlm_sandbox.ipynb
+│   ├── 02_segmentation.ipynb
+│   ├── 03_htr.ipynb
+│   └── 04_evaluation.ipynb
+│
+├── src/
+│   ├── lmstudio.py
+│   ├── images.py
+│   ├── alto.py
+│   ├── segmentation.py
+│   └── evaluation.py
+│
+├── data/
+│   ├── images/
+│   ├── alto/
+│   ├── derivatives/
+│   ├── crops/
+│   └── results/
+│
+├── prompts/
+│   ├── segmentation.txt
+│   ├── htr.txt
+│   └── classification.txt
+│
+├── pyproject.toml
+└── README.md
+```
+
+## Installation
+
+The project uses Python and [`uv`](https://docs.astral.sh/uv/) for environment and dependency management.
+
+Install `uv` on macOS:
+
+```bash
+brew install uv
+```
+
+Clone or create the project and install the initial dependencies:
+
+```bash
+uv add jupyterlab \
+       pillow \
+       matplotlib \
+       pandas \
+       requests \
+       openai \
+       pydantic \
+       shapely \
+       lxml
+```
+
+Start JupyterLab:
+
+```bash
+uv run jupyter lab
+```
+
+## LM Studio
+
+Start LM Studio and load a vision-capable model such as:
+
+```text
+Qwen3-VL-8B-Instruct-MLX
+```
+
+The model should report:
+
+```text
+format: mlx
+vision: true
+```
+
+The default LM Studio API endpoint is:
+
+```text
+http://localhost:1234/v1
+```
+
+A Python client can be created with:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:1234/v1",
+    api_key="lm-studio",
+)
+```
+
+Model identifiers can then be treated as experimental variables:
+
+```python
+MODEL_8B = "qwen3-vl-8b-instruct-mlx"
+MODEL_30B = "qwen3-vl-30b-a3b-instruct-mlx"
+```
+
+## Image Handling
+
+Original archival TIFFs should be retained without modification.
+
+For whole-page VLM processing, create a PNG derivative:
+
+```python
+from src.images import create_vlm_derivative
+
+create_vlm_derivative(
+    "data/images/example.tif",
+    "data/derivatives/example.png",
+    max_dimension=2048,
+)
+```
+
+VLM segmentation coordinates use a normalized `0–1000` coordinate system.
+
+For example:
+
+```json
+{
+  "type": "stamp_or_seal",
+  "bbox": [390, 80, 735, 290],
+  "confidence": 0.91
+}
+```
+
+These coordinates can then be mapped back onto the original TIFF for high-resolution cropping.
+
+```python
+from src.images import crop_normalized_bbox
+
+crop = crop_normalized_bbox(
+    "data/images/example.tif",
+    (390, 80, 735, 290),
+    padding=50,
+)
+```
+
+This avoids performing HTR on a downscaled whole-page image.
+
+## ALTO
+
+Existing eScriptorium output is imported from ALTO XML.
+
+The ALTO parser preserves:
+
+* Page dimensions
+* Text blocks
+* Region types
+* Polygons
+* Text lines
+* Baselines
+* Existing HTR output
+* Confidence values
+
+Example:
+
+```python
+from src.alto import load_alto
+
+page = load_alto(
+    "data/alto/example.xml"
+)
+
+print(page.image_filename)
+
+for block in page.blocks:
+    print(block.block_type)
+
+    for line in block.lines:
+        print(line.text)
+```
+
+eScriptorium output is treated as a **model prediction**, not as ground truth.
+
+## Ground Truth
+
+The eventual evaluation architecture is:
+
+```text
+                     eScriptorium
+                          │
+                          ▼
+                     predictions
+                          │
+                          │
+Human annotation ─────────┼──── evaluation
+                          │
+                          │
+                     predictions
+                          ▲
+                          │
+                       VLMs
+```
+
+Human-reviewed annotations should ultimately serve as the gold standard against which all systems are evaluated.
+
+Existing eScriptorium output can nevertheless provide useful weak labels and can help prioritize material for human review.
+
+## Segmentation Evaluation
+
+Region detection can initially be evaluated using Intersection over Union (IoU).
+
+```python
+from src.evaluation import match_regions
+
+matches, missed, extra = match_regions(
+    human_regions,
+    qwen_regions,
+    iou_threshold=0.5,
+)
+```
+
+Detection and classification should be evaluated independently.
+
+This distinguishes:
+
+> Did the model find the object?
+
+from:
+
+> Did the model correctly identify the object?
+
+Metrics can be calculated separately for classes such as:
+
+```text
+main_text
+marginal_text
+stamp_or_seal
+handwritten_annotation
+archival_mark
+```
+
+Potential metrics include:
+
+* Precision
+* Recall
+* F1
+* IoU
+* Mean IoU
+* AP/mAP
+
+## HTR Evaluation
+
+Initial HTR evaluation uses:
+
+* Character Error Rate (CER)
+* Word Error Rate (WER)
+
+Example:
+
+```python
+from src.evaluation import htr_metrics
+
+metrics = htr_metrics(
+    reference=human_transcription,
+    hypothesis=model_transcription,
+)
+
+print(metrics.cer)
+print(metrics.wer)
+```
+
+### Unicode Normalization
+
+Arabic-script historical material requires an explicit normalization policy.
+
+The project should eventually distinguish between:
+
+**Diplomatic CER**
+
+Measures the model against the transcription exactly as encoded by the annotator.
+
+**Normalized CER**
+
+Applies a documented normalization policy before comparison.
+
+Possible normalization decisions include:
+
+* Unicode NFC/NFKC
+* Combining marks
+* Diacritics
+* Arabic/Persian character variants
+* Alef forms
+* Whitespace
+* Punctuation
+
+Normalization should never occur silently.
+
+## Prompt Versioning
+
+Prompts are part of the experimental methodology and should be versioned.
+
+For example:
+
+```text
+prompts/
+├── segmentation-v1.txt
+├── segmentation-v2.txt
+├── htr-v1.txt
+└── classification-v1.txt
+```
+
+An initial segmentation prompt might be:
+
+```text
+You are analyzing a historical archival document.
+
+Identify visually distinct regions on the page.
+
+Use only these classes:
+
+main_text
+marginal_text
+stamp_or_seal
+handwritten_annotation
+archival_mark
+illustration
+unknown
+
+For every region return:
+
+{
+  "type": "...",
+  "bbox": [x1, y1, x2, y2],
+  "confidence": 0.0
+}
+
+Coordinates must be normalized from 0–1000.
+
+Do not transcribe text.
+Do not infer semantic meaning.
+Identify only visually observable regions.
+```
+
+## Experiment Provenance
+
+Every model run should preserve enough information to reproduce the experiment.
+
+Example:
+
+```json
+{
+  "image": "example.tif",
+  "model": "qwen3-vl-8b-instruct-mlx",
+  "quantization": "8bit",
+  "task": "segmentation",
+  "prompt_version": "segmentation-v1",
+  "coordinate_system": "normalized-1000",
+  "regions": []
+}
+```
+
+Additional metadata should eventually include:
+
+* Model revision
+* Inference backend
+* Runtime version
+* Image derivative dimensions
+* Temperature
+* Maximum tokens
+* Prompt hash/version
+* Date/time
+* Processing duration
+
+## Experimental Comparisons
+
+The initial benchmark should compare identical pages and prompts across models.
+
+For example:
+
+| Model            | Segmentation | Seal Detection | Annotation Detection | Language ID | HTR |
+| ---------------- | ------------ | -------------- | -------------------- | ----------- | --- |
+| eScriptorium     | ✓            | ✓              | ✓                    | —           | ✓   |
+| Qwen3-VL-8B      | ✓            | ✓              | ✓                    | ✓           | ✓   |
+| Qwen3-VL-30B-A3B | ✓            | ✓              | ✓                    | ✓           | ✓   |
+
+Model comparisons should use the same human-reviewed test set.
+
+The project should also investigate whether existing HTR can improve VLM performance:
+
+### Image only
+
+```text
+image → VLM → transcription
+```
+
+### Image + eScriptorium hypothesis
+
+```text
+image
+   +
+eScriptorium HTR
+   ↓
+VLM correction
+   ↓
+transcription
+```
+
+### eScriptorium baseline
+
+```text
+image → eScriptorium → transcription
+```
+
+This allows us to test whether specialist HTR and general-purpose multimodal models are complementary.
+
+## Toward an AI Challenge
+
+A mature dataset could support independent challenge tracks:
+
+### Track 1 — Layout Analysis
+
+Detect and segment document regions.
+
+### Track 2 — Stamp and Seal Detection
+
+Locate and classify stamps and seals.
+
+### Track 3 — Script and Language Identification
+
+Identify scripts and languages at page or region level.
+
+### Track 4 — Historical HTR
+
+Produce diplomatic transcriptions of text-bearing regions.
+
+### Track 5 — Waqf Detection
+
+Identify regions or documents containing evidence of waqf/endowment status.
+
+### Track 6 — Semantic Document Understanding
+
+Extract entities and document functions such as people, institutions, dates, ownership, provenance, and administrative annotations.
+
+This modular structure allows systems to participate in individual tasks without requiring a single model to solve the entire document-understanding problem.
+
+## Development Principles
+
+1. **Preserve original images.** Never modify source TIFFs.
+2. **Separate observation from interpretation.** Visual segmentation and semantic classification are distinct tasks.
+3. **Preserve uncertainty.** Models and annotators should be able to mark uncertain or illegible material.
+4. **Do not treat model output as ground truth.**
+5. **Version prompts and model configurations.**
+6. **Retain raw model responses.**
+7. **Evaluate against human-reviewed annotations.**
+8. **Keep the pipeline model-independent.**
+9. **Document normalization decisions.**
+10. **Design the dataset for scholarly reuse, not only model performance.**
+
+## Status
+
+This project is currently exploratory.
+
+Initial work focuses on a small number of representative historical documents processed previously with eScriptorium. The immediate goal is to determine where modern VLMs improve on or complement existing segmentation and HTR pipelines before defining a larger annotation campaign or challenge dataset.

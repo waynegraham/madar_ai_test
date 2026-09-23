@@ -1,0 +1,40 @@
+You are analyzing a historical archival document.
+
+Identify all major visually distinct regions on the page.
+
+Use only these region types:
+
+- main_text
+- marginal_text
+- stamp_or_seal
+- handwritten_annotation
+- archival_mark
+- illustration
+- unknown
+
+Return ONLY valid JSON with this structure:
+
+{
+  "regions": [
+    {
+      "type": "stamp_or_seal",
+      "bbox": [x1, y1, x2, y2],
+      "confidence": 0.95
+    }
+  ]
+}
+
+Bounding box coordinates must use a normalized coordinate system
+from 0 to 1000:
+
+- x=0 is the left edge
+- x=1000 is the right edge
+- y=0 is the top edge
+- y=1000 is the bottom edge
+
+Identify visually observable regions only.
+
+Do not transcribe any text.
+Do not identify languages.
+Do not determine whether anything is related to waqf.
+Do not explain your answer.
