@@ -1,0 +1,53 @@
+{
+  "model": "qwen3-vl-8b-instruct-mlx",
+  "task": "segmentation",
+  "prompt_version": "segmentation-v1",
+  "image": "../data/derivatives/00003-1345-AB009712.png",
+  "elapsed_seconds": 12.835118499999226,
+  "prompt": "You are analyzing a historical archival document.\n\nIdentify all major visually distinct regions on the page.\n\nUse only these region types:\n\n- main_text\n- marginal_text\n- stamp_or_seal\n- handwritten_annotation\n- archival_mark\n- illustration\n- unknown\n\nReturn ONLY valid JSON with this structure:\n\n{\n  \"regions\": [\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [x1, y1, x2, y2],\n      \"confidence\": 0.95\n    }\n  ]\n}\n\nBounding box coordinates must use a normalized coordinate system\nfrom 0 to 1000:\n\n- x=0 is the left edge\n- x=1000 is the right edge\n- y=0 is the top edge\n- y=1000 is the bottom edge\n\nIdentify visually observable regions only.\n\nDo not transcribe any text.\nDo not identify languages.\nDo not determine whether anything is related to waqf.\nDo not explain your answer.",
+  "response": {
+    "regions": [
+      {
+        "type": "main_text",
+        "bbox": [
+          214,
+          63,
+          879,
+          590
+        ],
+        "confidence": 0.98
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          25,
+          549,
+          453,
+          738
+        ],
+        "confidence": 0.96
+      },
+      {
+        "type": "archival_mark",
+        "bbox": [
+          70,
+          21,
+          319,
+          138
+        ],
+        "confidence": 0.94
+      },
+      {
+        "type": "stamp_or_seal",
+        "bbox": [
+          507,
+          634,
+          812,
+          892
+        ],
+        "confidence": 0.93
+      }
+    ]
+  },
+  "raw_content": "{\n  \"regions\": [\n    {\n      \"type\": \"main_text\",\n      \"bbox\": [214, 63, 879, 590],\n      \"confidence\": 0.98\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [25, 549, 453, 738],\n      \"confidence\": 0.96\n    },\n    {\n      \"type\": \"archival_mark\",\n      \"bbox\": [70, 21, 319, 138],\n      \"confidence\": 0.94\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [507, 634, 812, 892],\n      \"confidence\": 0.93\n    }\n  ]\n}"
+}

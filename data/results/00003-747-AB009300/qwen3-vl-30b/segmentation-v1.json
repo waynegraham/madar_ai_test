@@ -1,0 +1,93 @@
+{
+  "model": "qwen3-vl-30b-a3b-instruct-mlx",
+  "task": "segmentation",
+  "prompt_version": "segmentation-v1",
+  "image": "../data/derivatives/00003-747-AB009300.png",
+  "elapsed_seconds": 24.684614750003675,
+  "prompt": "You are analyzing a historical archival document.\n\nIdentify all major visually distinct regions on the page.\n\nUse only these region types:\n\n- main_text\n- marginal_text\n- stamp_or_seal\n- handwritten_annotation\n- archival_mark\n- illustration\n- unknown\n\nReturn ONLY valid JSON with this structure:\n\n{\n  \"regions\": [\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [x1, y1, x2, y2],\n      \"confidence\": 0.95\n    }\n  ]\n}\n\nBounding box coordinates must use a normalized coordinate system\nfrom 0 to 1000:\n\n- x=0 is the left edge\n- x=1000 is the right edge\n- y=0 is the top edge\n- y=1000 is the bottom edge\n\nIdentify visually observable regions only.\n\nDo not transcribe any text.\nDo not identify languages.\nDo not determine whether anything is related to waqf.\nDo not explain your answer.",
+  "response": {
+    "regions": [
+      {
+        "type": "main_text",
+        "bbox": [
+          218,
+          134,
+          830,
+          715
+        ],
+        "confidence": 0.98
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          523,
+          14,
+          769,
+          130
+        ],
+        "confidence": 0.95
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          63,
+          58,
+          249,
+          170
+        ],
+        "confidence": 0.95
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          340,
+          751,
+          489,
+          806
+        ],
+        "confidence": 0.95
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          23,
+          598,
+          124,
+          697
+        ],
+        "confidence": 0.95
+      },
+      {
+        "type": "stamp_or_seal",
+        "bbox": [
+          45,
+          392,
+          281,
+          550
+        ],
+        "confidence": 0.97
+      },
+      {
+        "type": "stamp_or_seal",
+        "bbox": [
+          113,
+          745,
+          362,
+          903
+        ],
+        "confidence": 0.97
+      },
+      {
+        "type": "archival_mark",
+        "bbox": [
+          340,
+          12,
+          567,
+          68
+        ],
+        "confidence": 0.95
+      }
+    ]
+  },
+  "raw_content": "```json\n{\n  \"regions\": [\n    {\n      \"type\": \"main_text\",\n      \"bbox\": [218, 134, 830, 715],\n      \"confidence\": 0.98\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [523, 14, 769, 130],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [63, 58, 249, 170],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [340, 751, 489, 806],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [23, 598, 124, 697],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [45, 392, 281, 550],\n      \"confidence\": 0.97\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [113, 745, 362, 903],\n      \"confidence\": 0.97\n    },\n    {\n      \"type\": \"archival_mark\",\n      \"bbox\": [340, 12, 567, 68],\n      \"confidence\": 0.95\n    }\n  ]\n}\n```"
+}
