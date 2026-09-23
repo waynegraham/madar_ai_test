@@ -752,3 +752,36 @@ human-drawn JSON boxes are acknowledged separately. Technical disclosures retain
 saved model names, prompt versions, inference durations, and available metadata.
 Input dimensions are read from the current saved derivative/crop file; missing
 quantization and other run settings remain unavailable rather than inferred.
+
+### Reusable publication segmentation figures
+
+```python
+from waqf_vlm.segmentation_figure import render_segmentation
+
+figure = render_segmentation(
+    "data/images/1280_AB010309_0005.tif",
+    regions,                         # existing normalized Region objects
+    "Qwen3-VL 30B",
+    human_ground_truth=None,         # supply only explicitly reviewed Regions
+    output_dir="reports/generated/assets",
+    show_confidence=False,
+)
+```
+
+This function writes a publication PNG and returns its path. It preserves the
+whole manuscript and its aspect ratio, with external numbered labels and a
+compact legend. Stable type codes use one restrained accent across systems.
+Dashed boundaries identify machine predictions; solid boundaries identify
+human-reviewed annotations. Fine leader lines connect boundaries to the external
+labels; label text never covers the manuscript. `reviewed=True` renders a
+reference-only figure. Merely originating in eScriptorium does not imply review.
+
+Figures use the existing normalized-bbox conversion utilities and keep the
+report's bounding-box policy (polygons are not substituted). TIFF input is
+supported. Confidence appears only with `show_confidence=True`, including legacy
+numeric strings. Identical inputs and rendering-library versions produce the
+same content-derived filename and PNG bytes; no timestamps or inference are
+involved. Default figures are unaffected by changes to undisplayed confidence.
+
+The report builder automatically uses this renderer for segmentation figures in
+`reports/generated/assets/`. Source manuscript images are never overwritten.

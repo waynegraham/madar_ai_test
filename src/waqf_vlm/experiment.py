@@ -6,11 +6,10 @@ import hashlib
 from itertools import combinations
 from pathlib import Path
 
-from PIL import ImageDraw, ImageFont
-
 from src.evaluation import intersection_over_union, match_regions
-from src.images import crop_normalized_bbox, load_image, normalized_bbox_to_pixels
-from src.segmentation import Region, validate_bbox
+from src.images import crop_normalized_bbox
+from src.segmentation import Region
+from .segmentation_figure import render_segmentation
 
 
 @dataclass
@@ -108,27 +107,10 @@ def _destination(output: Path, identity: str) -> tuple[str, Path]:
 
 def illustrate_experiment(systems: list[SegmentationSystem], disagreements: list[Disagreement], source: Path, output: Path) -> None:
     """Draw numbered boxes over a resized original; crop from the full-resolution source."""
-    image = load_image(source).convert("RGB")
-    image.thumbnail((1800, 1800))
-    font = ImageFont.load_default(size=22)
     for system in systems:
-        overlay = image.copy()
-        draw = ImageDraw.Draw(overlay)
-        for number, region in enumerate(system.regions, 1):
-            validate_bbox(region.bbox)
-            x1, y1, x2, y2 = normalized_bbox_to_pixels(region.bbox, overlay.width, overlay.height)
-            draw.rectangle((x1, y1, x2, y2), outline="#f8f5ee", width=6)
-            draw.rectangle((x1, y1, x2, y2), outline="#31594c", width=3)
-            text = str(number)
-            bounds = draw.textbbox((0, 0), text, font=font)
-            width = bounds[2] - bounds[0] + 12
-            label_x = max(0, min(x1, overlay.width - width))
-            label_y = max(0, min(y1 - 30, overlay.height - 32))
-            draw.rectangle((label_x, label_y, label_x + width, label_y + 30), fill="#f8f5ee", outline="#31594c", width=1)
-            draw.text((label_x + 6, label_y + 2), text, font=font, fill="#292b28")
-        relative, destination = _destination(output, f"overlay:{source.name}:{system.source}")
-        overlay.save(destination)
-        system.overlay = relative
+        destination = render_segmentation(source, system.regions, system.name,
+                                          output_dir=output / "assets", reviewed=system.reviewed)
+        system.overlay = destination.relative_to(output).as_posix()
     for disagreement in disagreements:
         relative, destination = _destination(output, f"disagreement:{source.name}:{disagreement.bbox}")
         crop = crop_normalized_bbox(source, disagreement.bbox, padding=30)
