@@ -8,6 +8,8 @@ from PIL import Image
 from lxml import html as html_parser
 
 from src.waqf_vlm.report import build_report, load_report_data
+from src.waqf_vlm.experiment import SegmentationSystem, find_disagreements
+from src.segmentation import Region
 
 
 ALTO = '''<alto xmlns="http://www.loc.gov/standards/alto/ns-v4#"><Layout>
@@ -125,6 +127,10 @@ class ReportTests(unittest.TestCase):
         self.assertIn("Image reproduction unavailable", page_html)
 
     def test_cli_has_no_inference_imports_or_network(self):
+        self.write("results/page/model/segmentation.json", json.dumps({"task": "segmentation", "response": {
+            "regions": [{"type": "main_text", "bbox": [100, 100, 900, 900]}]}}))
+        (self.data / "images").mkdir()
+        Image.new("RGB", (100, 200), "beige").save(self.data / "images/page.tif")
         code = '''import sys
 from pathlib import Path
 def guard(event, args):
@@ -137,6 +143,43 @@ assert "src.lmstudio" not in sys.modules
 assert "openai" not in sys.modules
 '''
         subprocess.run([sys.executable, "-B", "-c", code, str(self.data), str(self.output)], check=True, capture_output=True)
+
+    def test_disagreements_describe_predictions_without_using_reference(self):
+        a = Region("a", "main_text", (100, 100, 500, 500))
+        b = Region("b", "stamp_or_seal", a.bbox)
+        systems = [SegmentationSystem("One", "one", [a]), SegmentationSystem("Two", "two", [b]),
+                   SegmentationSystem("Human", "truth", [b], reviewed=True)]
+        differences = find_disagreements(systems, {})
+        self.assertEqual(len(differences), 1)
+        self.assertIn("overlapping region", differences[0].heading)
+        self.assertEqual([name for name, _ in differences[0].observations], ["One", "Two"])
+        self.assertEqual(find_disagreements([systems[0], SegmentationSystem("Same", "same", [a])], {}), [])
+
+    def test_corrected_alto_is_required_for_review_section(self):
+        self.write("ground-truth/page.json", json.dumps({"image": "page.tif", "image_width": 100,
+            "image_height": 100, "regions": []}))
+        report = build_report(self.data, self.output)
+        path = self.output / 'manuscripts' / report.pages[0].filename
+        self.assertIn('Human review not yet available.', path.read_text())
+        self.write('ground-truth/alto/page.xml', ALTO)
+        build_report(self.data, self.output)
+        self.assertNotIn('Human review not yet available.', path.read_text())
+        self.assertIn('Human-corrected ALTO is available', path.read_text())
+        self.assertIn('retained text', path.read_text())
+
+    def test_repository_experiment_counts_and_missing_run_metadata(self):
+        data = Path(__file__).resolve().parents[1] / 'data'
+        page = next(p for p in load_report_data(data).pages if p.id == '1280_AB010309_0005')
+        self.assertEqual([s.name for s in page.predictions], ['eScriptorium', 'Qwen3-VL 8B', 'Qwen3-VL 30B'])
+        self.assertEqual([len(s.regions) for s in page.predictions], [11, 9, 10])
+        self.assertEqual(page.predictions[0].skipped_blocks, 1)
+        self.assertEqual([s.counts.get('stamp_or_seal', 0) for s in page.predictions], [0, 3, 3])
+        self.assertEqual(page.disagreements[0].bbox, (509, 432, 617, 521))
+        self.assertFalse(page.corrected_alto)
+        for artifact in page.artifacts:
+            if artifact.kind == 'Page layout':
+                self.assertIn('1246 × 2048', artifact.details['Input dimensions'])
+                self.assertEqual(artifact.details['Quantization'], 'Unavailable — not recorded')
 
 
 if __name__ == "__main__":

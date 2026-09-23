@@ -15,7 +15,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from src.alto import load_alto
 from src.annotation import load_annotations
 from src.images import create_vlm_derivative, image_info
-from src.segmentation import vlm_json_to_regions
+from src.segmentation import alto_to_regions, vlm_json_to_regions
+from .experiment import SegmentationSystem, Disagreement, find_disagreements, illustrate_experiment, system_name
 
 
 LABELS = {
@@ -59,6 +60,16 @@ class Manuscript:
     images: list[str] = field(default_factory=list)
     artifacts: list[Artifact] = field(default_factory=list)
     figures: list[ManuscriptImage] = field(default_factory=list)
+    segmentations: list[SegmentationSystem] = field(default_factory=list)
+    disagreements: list[Disagreement] = field(default_factory=list)
+
+    @property
+    def predictions(self) -> list[SegmentationSystem]:
+        return [system for system in self.segmentations if not system.reviewed]
+
+    @property
+    def corrected_alto(self) -> list[SegmentationSystem]:
+        return [system for system in self.segmentations if system.reviewed]
 
     @property
     def filename(self) -> str:
@@ -136,6 +147,10 @@ def load_report_data(data_dir: Path) -> ReportData:
                 if without_box:
                     artifact.notes.append(f"{without_box} block(s) lack a bounding box. Their text is retained here.")
                 target.artifacts.append(artifact)
+                target.segmentations.append(SegmentationSystem(
+                    "Human-corrected eScriptorium" if reviewed else "eScriptorium",
+                    relative(path), alto_to_regions(alto), reviewed, without_box,
+                ))
             except Exception as exc:
                 issues.append(f"{relative(path)}: could not load ALTO ({exc}).")
 
@@ -198,8 +213,34 @@ def load_report_data(data_dir: Path) -> ReportData:
             else:
                 artifact.notes.append("This task has no report adapter yet; no results have been inferred.")
             target.artifacts.append(artifact)
+            if task == "segmentation":
+                target.segmentations.append(SegmentationSystem(system_name(artifact.origin), relative(path), regions))
+            artifact.details.update({
+                "Model name": saved.get("model") or "Unavailable",
+                "Quantization": saved.get("quantization") or "Unavailable — not recorded",
+                "Temperature": saved.get("temperature", "Unavailable — not recorded"),
+                "Maximum tokens": saved.get("max_tokens", "Unavailable — not recorded"),
+                "Input dimensions": "Unavailable",
+            })
+            # Legacy paths are notebook-relative; never resolve arbitrary paths outside data.
+            recorded_image = saved.get("image")
+            if isinstance(recorded_image, str):
+                parts_image = Path(recorded_image).parts
+                if len(parts_image) >= 3 and parts_image[:2] == ("..", "data"):
+                    image_path = data_dir.joinpath(*parts_image[2:]).resolve()
+                else:
+                    image_path = (data_dir / recorded_image).resolve()
+                if image_path.is_relative_to(data_dir) and image_path.is_file():
+                    try:
+                        info = image_info(image_path)
+                        artifact.details["Input dimensions"] = f"{info.width} × {info.height} pixels (from the current saved input file)"
+                    except (OSError, ValueError):
+                        pass
         except Exception as exc:
             issues.append(f"{relative(path)}: could not load saved experiment ({exc}).")
+    for manuscript in pages.values():
+        manuscript.segmentations.sort(key=lambda s: (s.reviewed, {"eScriptorium": 0, "Qwen3-VL 8B": 1, "Qwen3-VL 30B": 2}.get(s.name, 3), s.source))
+        manuscript.disagreements = find_disagreements(manuscript.segmentations, LABELS)
     return ReportData([pages[key] for key in sorted(pages)], issues)
 
 
@@ -275,10 +316,16 @@ def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None
     prepare_figures(report, data_dir, output_dir)
     filenames = []
     for manuscript in report.pages:
+        if manuscript.figures:
+            try:
+                illustrate_experiment(manuscript.segmentations, manuscript.disagreements,
+                                      data_dir / manuscript.figures[0].source, output_dir)
+            except (OSError, ValueError) as exc:
+                report.issues.append(f"{manuscript.id}: some experiment illustrations are unavailable ({exc}).")
         destination = output_dir / "manuscripts" / manuscript.filename
         if destination.is_symlink():
             raise ValueError(f"Refusing symlink output: {destination}")
-        destination.write_text(page_template.render(page=manuscript, asset_prefix="../", title=manuscript.id), encoding="utf-8")
+        destination.write_text(page_template.render(page=manuscript, labels=LABELS, asset_prefix="../", title=f"Manuscript {manuscript.id}"), encoding="utf-8")
         filenames.append(manuscript.filename)
     (output_dir / "index.html").write_text(index_template.render(report=report, asset_prefix="", title="Manuscript research report"), encoding="utf-8")
     # Only remove stale detail pages explicitly owned by a previous build.

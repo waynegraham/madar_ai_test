@@ -1,41 +1,68 @@
 {% extends "base.html" %}
-{% from "components.html" import manuscript_figure, review_labels %}
+{% from "components.html" import manuscript_figure, segmentation_figure, review_labels %}
 {% block content %}
 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">All manuscript images</a></nav>
 <header class="page-heading">
-<p class="eyebrow">Manuscript image</p><h1 class="manuscript-identifier">{{ page.id }}</h1>
-<p class="lede">The source image and its recorded readings, presented for examination.</p>
-<nav class="section-nav" aria-label="On this page"><a href="#source-evidence">Image &amp; provenance</a><a href="#recorded-readings">Recorded readings</a><a href="#interpretation">Open questions</a></nav>
+<p class="eyebrow">A manuscript experiment</p><h1 class="manuscript-identifier">Manuscript {{ page.id }}</h1>
+{% if page.predictions|length > 1 %}<p class="lede">The same manuscript page has been analyzed by {{ page.predictions|length }} document-analysis systems. Their proposed divisions of the page offer different starting points for examining its text, annotations, and other visible features.</p>{% else %}<p class="lede">This page brings together the manuscript image and the available document-analysis records. Further system comparisons are not yet available.</p>{% endif %}
+<p>Begin with the original image, then compare what the systems have marked. The comparisons describe differences in saved results; they do not determine which reading is correct.</p>
+<nav class="section-nav" aria-label="On this page"><a href="#original">Original manuscript</a><a href="#segmentation">Computer observations</a><a href="#inventory">Region inventory</a><a href="#disagreements">Disagreements</a><a href="#human-review">Human review</a></nav>
 </header>
-<section class="evidence-section" aria-labelledby="source-evidence">
-<div class="section-heading"><p class="eyebrow">Source evidence</p><h2 id="source-evidence">Image &amp; provenance</h2></div>
+<section class="evidence-section" aria-labelledby="original">
+<div class="section-heading"><p class="eyebrow">Source evidence</p><h2 id="original">Original manuscript</h2></div>
 <div class="image-and-provenance">
 <div>{% for figure in page.figures %}{{ manuscript_figure(figure, '../', loop.index) }}{% else %}<p class="image-unavailable">Image reproduction unavailable.</p>{% endfor %}</div>
-<aside class="provenance-note" aria-label="Image provenance and reference material">
-<h3>About this image</h3><p>Catalogue title, date, place, collection description, and image credit are unavailable in the report data.</p>
-{% if page.images %}<h4>Source files</h4><ul class="source-files">{% for image in page.images %}<li><code>{{ image }}</code></li>{% endfor %}</ul><p>Display copies preserve the whole page. Original image files remain unchanged.</p>{% else %}<p>Source image: unavailable.</p>{% endif %}
-<h4>Reference material</h4>
-<p>Human layout reference: {{ "available; review and completeness notes appear below." if page.has_human_layout else "unavailable." }}</p>
-<p>Human-corrected transcription: {{ "available in the designated reference export; correction scope is not recorded." if page.has_reviewed_text else "unavailable." }}</p>
+<aside class="provenance-note" aria-label="Image provenance">
+<h3>About this image</h3><p>The image is shown without segmentation marks. Display copies preserve the whole page; original source files remain unchanged.</p>
+<p>Catalogue title, date, place, collection description, and image credit are unavailable in the report data.</p>
+{% if page.images %}<h4>Source files</h4><ul class="source-files">{% for image in page.images %}<li><code>{{ image }}</code></li>{% endfor %}</ul>{% else %}<p>Source image: unavailable.</p>{% endif %}
 </aside>
 </div>
 </section>
-<section class="readings-section" aria-labelledby="recorded-readings">
-<div class="section-heading"><p class="eyebrow">Recorded observations &amp; proposed readings</p><h2 id="recorded-readings">Reading the manuscript</h2></div>
-<p class="scholarly-note">Readings below retain their recorded wording and line breaks. Machine suggestions are separated from human reference material. Their appearance here does not verify their accuracy.</p>
-{% for artifact in page.artifacts %}
-<article class="research-record {{ 'research-record--suggested' if artifact.role == 'prediction' else 'research-record--reference' }}" aria-labelledby="record-{{ loop.index }}">
-<header>{{ review_labels(artifact) }}<h3 id="record-{{ loop.index }}">{{ artifact.kind }}</h3><p class="record-origin">Source: <span class="model-name">{{ artifact.origin }}</span></p></header>
-{% for note in artifact.notes %}<p class="scholarly-note">{{ note }}</p>{% endfor %}
-{% if artifact.counts %}<div class="table-wrap" role="region" aria-label="Recorded region inventory {{ loop.index }}" tabindex="0"><table class="comparison-table region-inventory"><caption>Recorded regions — an inventory, not an accuracy assessment</caption><thead><tr><th scope="col">Region description</th><th scope="col">Recorded count</th></tr></thead><tbody>{% for label, count in artifact.counts.items() %}<tr><th scope="row">{{ label }}</th><td>{{ count }}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
-{% if artifact.transcriptions %}<h4>{{ "Reference text" if artifact.role == "reference" else "Suggested text — not a verified reading" }}</h4><div class="reading-text">{% for text in artifact.transcriptions %}<div class="transcription" dir="auto">{{ text }}</div>{% endfor %}</div>{% elif artifact.kind == "Transcription, script and language" %}<p>Transcription: unavailable.</p>{% endif %}
-<details class="technical-details"><summary>Technical details &amp; saved source</summary><dl>{% for key, value in artifact.details.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}<dt>Saved file (relative to data directory)</dt><dd><code>{{ artifact.path }}</code></dd></dl></details>
-</article>
-{% else %}<p>No readable experiment or annotation records are available for this image.</p>{% endfor %}
+<section aria-labelledby="segmentation">
+<div class="section-heading"><p class="eyebrow">Machine suggested · not yet reviewed</p><h2 id="segmentation">What does the computer see?</h2></div>
+<p>Before attempting a transcription, a system can divide the page into regions. These boxes describe where a system located a feature; the assigned labels describe what it proposed that feature might be.</p>
+{% if page.predictions %}<p>{% for system in page.predictions %}{{ system.name }} records {{ system.regions|length }} usable region{{ '' if system.regions|length == 1 else 's' }}{{ '; ' if not loop.last else '.' }}{% endfor %} A larger number of regions does not by itself mean a more accurate account of the manuscript.</p>
+<div class="segmentation-comparison">{% for system in page.predictions %}{{ segmentation_figure(system, labels) }}{% endfor %}</div>
+{% else %}<p>Saved segmentation results are unavailable.</p>{% endif %}
 </section>
-<section class="interpretation-section" aria-labelledby="interpretation"><p class="eyebrow">Interpretation · questions for further study</p><h2 id="interpretation">What remains open</h2>
-<aside class="callout-question"><p>Which suggested readings can be supported by the visible manuscript, and which require closer examination?</p></aside>
-<p>Accuracy has not been calculated in this report. Waqf evidence, ownership, provenance, people, institutions, places, and dates have not been assessed here.</p>
-<aside class="experimental-warning"><p><strong>A limit of this record.</strong> An absence of recorded analysis does not mean an absence of evidence in the manuscript.</p></aside>
+<section aria-labelledby="inventory"><h2 id="inventory">Region inventory</h2>
+<p>How do the systems describe the page? This inventory groups their saved labels into a shared vocabulary. It counts proposed regions, not verified manuscript features.</p>
+{% if page.predictions %}<div class="table-wrap" role="region" aria-label="Region inventory by system" tabindex="0"><table class="comparison-table"><caption>Usable region boxes in each saved segmentation</caption><thead><tr><th scope="col">Region type</th>{% for system in page.predictions %}<th scope="col">{{ system.name }}</th>{% endfor %}</tr></thead><tbody>
+{% for key, label in labels.items() %}<tr><th scope="row">{{ label }}</th>{% for system in page.predictions %}<td>{{ system.counts.get(key, 0) }}</td>{% endfor %}</tr>{% endfor %}
+</tbody><tfoot><tr><th scope="row">Total recorded boxes</th>{% for system in page.predictions %}<td>{{ system.regions|length }}</td>{% endfor %}</tr></tfoot></table></div>
+{% for system in page.predictions %}{% if system.skipped_blocks %}<p class="scholarly-note">{{ system.name }}: {{ system.skipped_blocks }} ALTO block(s) without bounding boxes are excluded from this visual inventory. Any text in those blocks is retained in the saved-record details below.</p>{% endif %}{% endfor %}
+<p class="scholarly-note">A zero means that no usable box carries that label in this result. It does not establish that the feature is absent from the manuscript. ALTO labels such as “Main,” “Note,” and “Stamp” are mapped to the shared vocabulary.</p>
+{% else %}<p>Region inventory unavailable: no readable segmentation results.</p>{% endif %}
+</section>
+<section aria-labelledby="disagreements"><div class="section-heading"><p class="eyebrow">Comparison · not an accuracy assessment</p><h2 id="disagreements">Where do the models disagree?</h2></div>
+<p>The following examples are selected automatically from differences in the saved boxes and labels. Each crop comes from the original source image, with a small margin for context.</p>
+{% for disagreement in page.disagreements %}<article class="disagreement-example" aria-labelledby="difference-{{ loop.index }}">
+{% if disagreement.crop %}<figure class="manuscript-figure disagreement-crop"><a class="figure-link" href="../{{ disagreement.crop }}" aria-label="Open disagreement crop {{ loop.index }}"><img src="../{{ disagreement.crop }}" alt="Detail from manuscript {{ page.id }} showing the region discussed in comparison {{ loop.index }}." loading="lazy"></a><figcaption class="figure-caption">Detail {{ loop.index }}. Cropped from <code>{{ page.figures[0].source }}</code> using saved region coordinates, with 30 source-image pixels of context. No interpretation has been added to the image.</figcaption></figure>{% else %}<p class="image-unavailable">Crop unavailable.</p>{% endif %}
+<div><h3 id="difference-{{ loop.index }}">{{ disagreement.heading }}</h3><p>{{ disagreement.explanation }}</p><dl class="comparison-observations">{% for name, observation in disagreement.observations %}<dt>{{ name }}</dt><dd>{{ observation }}</dd>{% endfor %}</dl></div>
+</article>{% else %}<p>{{ 'No label differences or unmatched boxes were found by this comparison rule.' if page.predictions|length > 1 else 'At least two saved segmentation results are needed to identify disagreements.' }}</p>{% endfor %}
+<details class="technical-details"><summary>How these examples were selected</summary><p>Predicted bounding boxes are matched one-to-one, taking the largest overlap first. A match requires intersection-over-union (IoU) of at least 0.5: the shared area divided by the area covered by either box. Labels do not determine the match. Polygons are not used.</p><p>Up to four examples are shown: the two Qwen variants are compared first, then other system pairs. Within each pair, differences in labels precede unmatched boxes; larger unmatched boxes precede smaller ones. Example crops overlapping a previously selected example at IoU 0.4 or greater are omitted to reduce repetition. This is an illustrative selection, not an exhaustive error list.</p><p>The observations beside each crop identify each system’s most-overlapping saved box. That box may be much larger than the crop. No matching counterpart does not necessarily mean a system overlooked the feature; it may have grouped or bounded it differently. No system is treated as ground truth in this comparison.</p></details>
+</section>
+<section aria-labelledby="human-review"><div class="section-heading"><p class="eyebrow">Reference evidence</p><h2 id="human-review">Human review</h2></div>
+{% if page.corrected_alto %}<p><span class="human-reviewed-label">Human reviewed</span></p><p>Human-corrected ALTO is available in the designated reference directory. It is shown separately from machine predictions. Reviewer identity and the scope of corrections are not recorded.</p>
+{% for system in page.corrected_alto %}{{ segmentation_figure(system, labels) }}{% endfor %}
+{% for artifact in page.artifacts if artifact.role == 'reference' and artifact.kind == 'eScriptorium ALTO' %}{% if artifact.transcriptions %}<h3>Reference transcription</h3><div class="reading-text">{% for text in artifact.transcriptions %}<div class="transcription" dir="auto">{{ text }}</div>{% endfor %}</div>{% else %}<p>Reference transcription unavailable in this corrected export.</p>{% endif %}{% endfor %}
+{% else %}<p class="review-pending-label">Human review not yet available.</p><p>No human-corrected eScriptorium ALTO is available for this page. Machine-generated ALTO remains a prediction.</p>{% endif %}
+{% for artifact in page.artifacts if artifact.kind == 'Human layout annotations' %}<aside class="scholarly-note"><p>Separately, {{ artifact.details.get('Regions') }} human-drawn region boxes are saved for this page. They are layout annotations, not a corrected ALTO review or a reviewed transcription. Independent review and page completeness are not recorded.</p></aside>{% endfor %}
+<p class="scholarly-note">Human-corrected transcription: {{ 'available in the designated reference export; correction scope is not recorded.' if page.has_reviewed_text else 'unavailable.' }}</p>
+</section>
+<section class="interpretation-section" aria-labelledby="why"><p class="eyebrow">Interpretation · future research</p><h2 id="why">Why this matters</h2>
+<p>Locating page features could eventually make them searchable across a larger manuscript corpus. A scholar might retrieve pages with proposed stamps or seals, compare marginal annotations, or bring together passages for closer reading.</p>
+<p>Finding a feature is only a first step. Establishing ownership, provenance, or waqf evidence requires reading the material in context and assessing it with scholarly expertise. The present comparisons do not establish those meanings.</p>
+<aside class="callout-question"><p>What could a corpus-wide index of page features help a scholar discover—and which connections would still require returning to the manuscript?</p></aside>
+</section>
+<section aria-labelledby="technical"><h2 id="technical">Technical details</h2>
+<details class="technical-details"><summary>Experiment records, processing information, and saved readings</summary>
+<p>All results were loaded from existing files. No model was run to produce this page. Display overlays use normalized 0–1000 bounding boxes mapped onto a proportionally resized source image. Source crops use original image coordinates. Input dimensions below describe the saved input file currently on disk, not independently verified run-time metadata.</p>
+{% for artifact in page.artifacts %}<article class="research-record"><h3>{{ artifact.kind }}</h3>{{ review_labels(artifact) }}<dl><dt>System or annotation source</dt><dd>{{ artifact.origin }}</dd>{% for key, value in artifact.details.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}{% if artifact.kind == 'eScriptorium ALTO' %}<dt>Model name, quantization, prompt version, and inference time</dt><dd>Unavailable — not recorded in the parsed ALTO.</dd>{% endif %}<dt>Saved source</dt><dd><code>{{ artifact.path }}</code></dd></dl>
+{% for note in artifact.notes %}<p class="scholarly-note">{{ note }}</p>{% endfor %}
+{% if artifact.transcriptions %}<details class="technical-details"><summary>{{ 'Saved reference text' if artifact.role == 'reference' else 'Saved suggested text — not a verified reading' }}</summary>{% for text in artifact.transcriptions %}<div class="transcription" dir="auto">{{ text }}</div>{% endfor %}</details>{% endif %}
+</article>{% endfor %}
+</details>
 </section>
 {% endblock %}

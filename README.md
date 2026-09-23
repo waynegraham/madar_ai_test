@@ -723,3 +723,32 @@ Run focused checks with:
 ```bash
 uv run python -m unittest discover -s tests -v
 ```
+
+### Manuscript experiment narrative
+
+Each detail page now follows the original manuscript image with available system
+segmentations, a shared region inventory, automatically selected disagreement
+crops, human-review status, and research context. The saved experiment for
+`1280_AB010309_0005` includes eScriptorium, Qwen3-VL 8B, and Qwen3-VL 30B.
+Only systems with readable saved segmentation data appear.
+
+`src/waqf_vlm/experiment.py` reuses the existing region conversion, matching, and
+image helpers. Numbered overlays are generated from saved bounding boxes;
+original-resolution crops have 30 pixels of context before display resizing.
+The inventory excludes ALTO blocks without bounding boxes and discloses that
+exclusion. Text from those blocks remains in the saved-record disclosure.
+
+Disagreement examples compare predictions using greedy one-to-one bounding-box
+IoU matching at 0.5, without requiring equal labels. The Qwen pair is prioritized,
+then label differences and larger unmatched boxes; up to four examples are
+shown, omitting examples overlapping an earlier selection at IoU 0.4 or above.
+The method is disclosed on the page. These are descriptive differences, never
+error judgments; a differently sized or grouped region may have no counterpart
+under this matching rule. Human references are excluded from this selection.
+
+Only corrected ALTO in `data/ground-truth/alto/` activates the human-reviewed
+section. Otherwise the page states “Human review not yet available.” Existing
+human-drawn JSON boxes are acknowledged separately. Technical disclosures retain
+saved model names, prompt versions, inference durations, and available metadata.
+Input dimensions are read from the current saved derivative/crop file; missing
+quantization and other run settings remain unavailable rather than inferred.

@@ -18,3 +18,11 @@
   <span class="{{ 'human-reviewed-label' if artifact.review == 'Human reviewed' else 'review-pending-label' }}">{{ artifact.review }}</span>
 </div>
 {%- endmacro %}
+
+{% macro segmentation_figure(system, labels, prefix='../') -%}
+<figure class="segmentation-figure">
+  {% if system.overlay %}<a class="figure-link" href="{{ prefix }}{{ system.overlay }}" aria-label="Open the full segmentation visualization for {{ system.name }}"><img src="{{ prefix }}{{ system.overlay }}" alt="{{ system.name }}: {{ system.regions|length }} numbered region boxes drawn over the manuscript. The region descriptions are listed in the accompanying key." loading="lazy"></a>{% else %}<p class="image-unavailable">Segmentation visualization unavailable.</p>{% endif %}
+  <figcaption class="figure-caption"><span class="caption-label">{{ system.name }}.</span> {{ system.regions|length }} region boxes from the saved coordinates. <span class="provenance">Coordinates: <code>{{ system.source }}</code>. Image: the source manuscript, reduced for display.</span></figcaption>
+  <details class="technical-details"><summary>Numbered region key</summary><ol class="region-key">{% for region in system.regions %}<li>{{ labels.get(region.region_type, region.region_type) }}</li>{% else %}<li>No usable regions recorded.</li>{% endfor %}</ol></details>
+</figure>
+{%- endmacro %}

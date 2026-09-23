@@ -131,3 +131,20 @@ code { font-size: .88em; overflow-wrap: anywhere; }
   h2, h3, h4 { break-after: avoid; }
   .table-wrap { overflow: visible; }
 }
+
+/* Experiment narrative: comparable full-page views, followed by focused details. */
+.segmentation-comparison { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6rem; align-items: start; margin-block: 2.5rem; }
+.segmentation-figure { margin: 0; min-width: 0; max-width: 760px; }
+.segmentation-figure img { display: block; width: 100%; height: auto; }
+.segmentation-figure .figure-link { padding: .6rem; }
+.region-key { padding-inline-start: 2rem; }
+.disagreement-example { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 2.5rem; border-top: 1px solid var(--rule); padding-top: 2rem; margin-block: 3rem; align-items: start; }
+.disagreement-example h3 { margin-top: 0; }
+.disagreement-crop img { max-height: 34rem; object-fit: contain; }
+.comparison-observations { font: .87rem/1.75 var(--sans); }
+.comparison-observations dt { font-weight: 650; margin-top: 1rem; }
+.comparison-observations dd { margin: .25rem 0 0; }
+.comparison-table tfoot th, .comparison-table tfoot td { border-top: 1px solid var(--ink); font-weight: 650; }
+@media (max-width: 1000px) { .segmentation-comparison { grid-template-columns: repeat(2, minmax(0, 1fr)); } .disagreement-example { gap: 1.5rem; } }
+@media (max-width: 700px) { .segmentation-comparison, .disagreement-example { grid-template-columns: minmax(0, 1fr); } }
+@media print { .segmentation-comparison, .disagreement-example { display: block; } .segmentation-figure { break-inside: avoid; margin-bottom: 2rem; } }
