@@ -1,103 +1,113 @@
 {
-  "model": "qwen3-vl-30b-instruct-mlx",
+  "model": "qwen3-vl-30b-a3b-instruct-mlx",
   "task": "segmentation",
   "prompt_version": "segmentation-v1",
   "image": "../data/derivatives/1280_AB010309_0005.png",
-  "elapsed_seconds": 12.23640295900259,
+  "elapsed_seconds": 17.4147332499997,
   "prompt": "You are analyzing a historical archival document.\n\nIdentify all major visually distinct regions on the page.\n\nUse only these region types:\n\n- main_text\n- marginal_text\n- stamp_or_seal\n- handwritten_annotation\n- archival_mark\n- illustration\n- unknown\n\nReturn ONLY valid JSON with this structure:\n\n{\n  \"regions\": [\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [x1, y1, x2, y2],\n      \"confidence\": 0.95\n    }\n  ]\n}\n\nBounding box coordinates must use a normalized coordinate system\nfrom 0 to 1000:\n\n- x=0 is the left edge\n- x=1000 is the right edge\n- y=0 is the top edge\n- y=1000 is the bottom edge\n\nIdentify visually observable regions only.\n\nDo not transcribe any text.\nDo not identify languages.\nDo not determine whether anything is related to waqf.\nDo not explain your answer.",
   "response": {
     "regions": [
       {
         "type": "main_text",
         "bbox": [
-          145,
-          278,
-          873,
-          409
+          147,
+          280,
+          869,
+          405
+        ],
+        "confidence": 0.98
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          250,
+          6,
+          619,
+          143
+        ],
+        "confidence": 0.97
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          120,
+          468,
+          507,
+          635
+        ],
+        "confidence": 0.96
+      },
+      {
+        "type": "handwritten_annotation",
+        "bbox": [
+          175,
+          120,
+          394,
+          186
         ],
         "confidence": 0.95
       },
       {
         "type": "handwritten_annotation",
         "bbox": [
-          173,
-          124,
-          395,
-          186
-        ],
-        "confidence": 0.92
-      },
-      {
-        "type": "handwritten_annotation",
-        "bbox": [
-          120,
-          467,
-          513,
-          638
-        ],
-        "confidence": 0.94
-      },
-      {
-        "type": "handwritten_annotation",
-        "bbox": [
-          247,
-          6,
-          619,
-          145
+          130,
+          645,
+          417,
+          720
         ],
         "confidence": 0.93
       },
       {
         "type": "handwritten_annotation",
         "bbox": [
-          128,
-          643,
-          417,
-          720
+          509,
+          432,
+          617,
+          521
         ],
-        "confidence": "0.95"
+        "confidence": 0.94
+      },
+      {
+        "type": "stamp_or_seal",
+        "bbox": [
+          459,
+          561,
+          697,
+          698
+        ],
+        "confidence": 0.95
       },
       {
         "type": "stamp_or_seal",
         "bbox": [
           243,
           391,
-          330,
-          450
+          328,
+          445
         ],
-        "confidence": 0.89
-      },
-      {
-        "type": "stamp_or_seal",
-        "bbox": [
-          460,
-          561,
-          700,
-          698
-        ],
-        "confidence": 0.92
+        "confidence": 0.96
       },
       {
         "type": "stamp_or_seal",
         "bbox": [
           201,
-          753,
-          460,
+          750,
+          456,
           793
         ],
-        "confidence": 0.85
+        "confidence": 0.92
       },
       {
         "type": "archival_mark",
         "bbox": [
-          459,
-          907,
-          692,
-          961
+          457,
+          908,
+          691,
+          958
         ],
-        "confidence": 0.83
+        "confidence": 0.94
       }
     ]
   },
-  "raw_content": "{\n  \"regions\": [\n    {\n      \"type\": \"main_text\",\n      \"bbox\": [145, 278, 873, 409],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [173, 124, 395, 186],\n      \"confidence\": 0.92\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [120, 467, 513, 638],\n      \"confidence\": 0.94\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [247, 6, 619, 145],\n      \"confidence\": 0.93\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [128, 643, 417, 720],\n      \"confidence\": \"0.95\"\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [243, 391, 330, 450],\n      \"confidence\": 0.89\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [460, 561, 700, 698],\n      \"confidence\": 0.92\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [201, 753, 460, 793],\n      \"confidence\": 0.85\n    },\n    {\n      \"type\": \"archival_mark\",\n      \"bbox\": [459, 907, 692, 961],\n      \"confidence\": 0.83\n    }\n  ]\n}"
+  "raw_content": "```json\n{\n  \"regions\": [\n    {\n      \"type\": \"main_text\",\n      \"bbox\": [147, 280, 869, 405],\n      \"confidence\": 0.98\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [250, 6, 619, 143],\n      \"confidence\": 0.97\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [120, 468, 507, 635],\n      \"confidence\": 0.96\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [175, 120, 394, 186],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [130, 645, 417, 720],\n      \"confidence\": 0.93\n    },\n    {\n      \"type\": \"handwritten_annotation\",\n      \"bbox\": [509, 432, 617, 521],\n      \"confidence\": 0.94\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [459, 561, 697, 698],\n      \"confidence\": 0.95\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [243, 391, 328, 445],\n      \"confidence\": 0.96\n    },\n    {\n      \"type\": \"stamp_or_seal\",\n      \"bbox\": [201, 750, 456, 793],\n      \"confidence\": 0.92\n    },\n    {\n      \"type\": \"archival_mark\",\n      \"bbox\": [457, 908, 691, 958],\n      \"confidence\": 0.94\n    }\n  ]\n}\n```"
 }

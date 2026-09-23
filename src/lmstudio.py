@@ -253,3 +253,15 @@ def save_result(
     )
 
     return destination
+
+def load_result(
+    path: str | Path,
+) -> dict[str, Any]:
+
+    path = Path(path)
+
+    return json.loads(
+        path.read_text(
+            encoding="utf-8"
+        )
+    )
