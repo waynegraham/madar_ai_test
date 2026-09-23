@@ -643,16 +643,65 @@ relative, so the report also works beneath a project URL. No JavaScript, remote
 fonts, inference server, or network access is required by the report generator.
 `uv` may need to install Python dependencies on first use.
 
-Alternative locations:
+Rebuild one manuscript page, using its exact image identifier:
+
+```bash
+uv run waqf-report build --manuscript 1280_AB010309_0005
+```
+
+Only that page's figures, crops, and detail HTML are regenerated. Shared navigation,
+index, methodology, overview, and styles are refreshed, but other built manuscript
+pages and their assets remain untouched. On a fresh output directory this creates
+a one-page report; subsequent targeted builds can add pages. Run a full build to
+incorporate changes to other pages and obtain a complete current sample. Older
+reports require one full build to upgrade their ownership manifest first.
+
+Start a local development server after building:
+
+```bash
+uv run waqf-report serve
+```
+
+Visit `http://127.0.0.1:8000/`. The server binds only to localhost, serves the
+generated directory, and stops with Ctrl-C. It does not build, watch files, or run
+models; run a build and refresh the browser after changes. A missing build, an
+invalid port, or an occupied port produces an error. Directory listings and
+symlink escapes are disabled.
+
+Alternative locations, port, and evaluation threshold:
 
 ```bash
 uv run waqf-report build --data data --output /tmp/waqf-report
+uv run waqf-report build --data data --output /tmp/waqf-report --min-reviewed-pages 5
+uv run waqf-report serve --output /tmp/waqf-report --port 8080
 ```
 
 Run commands from the repository root, or supply explicit paths. Output must be
 separate from source data, templates, and Python code. A nonempty output folder
-must belong to a previous report build. Builds update generated pages and remove
-stale detail pages listed in the previous build's ownership file.
+must belong to a previous report build. Source directories and output symlinks are
+rejected. Rendering completes in a temporary staging directory before files are
+published; each changed file is replaced atomically. The ownership manifest tracks
+generated files, so obsolete owned pages/assets can be removed without deleting
+unrelated files. Byte-identical files are left untouched, including their mtimes.
+
+The full build discovers `data/images/`, machine ALTO in `data/alto/` and
+`data/predictions/escriptorium/`, corrected ALTO in `data/ground-truth/alto/`, human
+region JSON in `data/ground-truth/`, and saved experiments in `data/results/`.
+It generates images and crops, calculates eligible evaluations, and renders all
+static pages. It never imports or calls the LM Studio client.
+
+Missing experiment directories are optional. Malformed records and unavailable
+images are reported in the terminal and report while valid material still builds.
+A missing data root, unknown `--manuscript` identifier, malformed output ownership
+manifest, or unavailable template is a build error. No example results are filled
+in. Fix the reported files and rebuild to remove their warnings.
+
+Reproducibility means identical file bytes for identical source files, templates,
+configuration, and dependency versions. Keep `uv.lock` with the project and use
+`uv run --locked waqf-report build` to require it unchanged. Build output contains
+no generation timestamp. Generated files are ignored by Git through
+`reports/generated/.gitignore`; publish the generated directory's contents,
+including `static/`, `images/`, `assets/`, and `manuscripts/`, without rewriting URLs.
 
 Report sources:
 

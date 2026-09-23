@@ -3,14 +3,18 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 import hashlib
 import json
 from pathlib import Path
 import shutil
+import re
+import tempfile
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader, TemplateError, select_autoescape
 
 from src.alto import load_alto
 from src.annotation import load_annotations
@@ -291,75 +295,201 @@ def prepare_figures(report: ReportData, data_dir: Path, output_dir: Path) -> Non
                 report.issues.append(f"{source}: display image unavailable ({exc}).")
 
 
-def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None, min_reviewed_pages: int = 5) -> ReportData:
-    """Render local HTML/CSS. Output must be separate from all source data."""
-    data_dir, output_dir = Path(data_dir).resolve(), Path(output_dir).resolve()
-    assets = Path(assets).resolve() if assets else _asset_root().resolve()
-    source_root = Path(__file__).resolve().parents[1]
-    for protected in (data_dir, assets / "templates", assets / "static", source_root):
-        if output_dir == protected or output_dir in protected.parents or protected in output_dir.parents:
-            raise ValueError(f"Output overlaps a protected input directory: {protected}")
-    marker = output_dir / ".waqf-report.json"
-    if output_dir.exists():
-        existing = {p.name for p in output_dir.iterdir()} - {".gitkeep", ".gitignore"}
-        if existing and not marker.is_file():
-            raise ValueError("Output directory is not empty and is not a previously generated report.")
-    report = load_report_data(data_dir)
-    overview = corpus_overview(report, data_dir, min_reviewed_pages=min_reviewed_pages)
+def _render_report(report: ReportData, selected: list[Manuscript], data_dir: Path,
+                   destination: Path, assets: Path, min_reviewed_pages: int) -> dict[str, list[str]]:
     environment = Environment(loader=FileSystemLoader(assets / "templates"),
                               autoescape=select_autoescape(["html", "xml"]))
-    index_template = environment.get_template("index.html")
-    page_template = environment.get_template("manuscript.html")
-    method_template = environment.get_template("method.html")
-    overview_template = environment.get_template("overview.html")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "manuscripts").mkdir(exist_ok=True)
-    # Refuse symlink destinations rather than following them outside output.
-    for destination in [output_dir / "static", output_dir / "manuscripts", marker,
-                        output_dir / "index.html", output_dir / "method.html", output_dir / "overview.html"]:
-        if destination.is_symlink():
-            raise ValueError(f"Refusing symlink output: {destination}")
-    static_destination = output_dir / "static"
-    for source in sorted((assets / "static").rglob("*")):
-        if source.is_file() and source.name != ".gitkeep":
-            destination = static_destination / source.relative_to(assets / "static")
-            if any(parent.is_symlink() for parent in [destination, *destination.parents] if parent != output_dir):
-                raise ValueError(f"Refusing symlink output: {destination}")
+    templates = {name: environment.get_template(name + ".html")
+                 for name in ("index", "manuscript", "method", "overview")}
+    shutil.copytree(assets / "static", destination / "static", ignore=shutil.ignore_patterns('.gitkeep'))
+    (destination / "manuscripts").mkdir()
+    page_files = {}
+    for page in selected:
+        prepare_figures(ReportData([page], report.issues), data_dir, destination)
+        if not page.images:
+            report.issues.append(f"{page.id}: original image unavailable; image figures and crops are omitted.")
+        if page.figures:
+            original = data_dir / page.figures[0].source
+            for action in (
+                lambda: render_htr_crops(page.htr_comparisons, original, destination),
+                lambda: illustrate_experiment(page.segmentations, page.all_disagreements, original, destination),
+            ):
+                try:
+                    action()
+                except (OSError, ValueError) as exc:
+                    report.issues.append(f"{page.id}: some illustrations are unavailable ({exc}).")
+        (destination / "manuscripts" / page.filename).write_text(templates['manuscript'].render(
+            page=page, labels=LABELS, asset_prefix="../", title=f"Manuscript {page.id}"), encoding="utf-8")
+        owned = {f'manuscripts/{page.filename}'}
+        for figure in page.figures:
+            owned.update((figure.preview, figure.thumbnail))
+        owned.update(s.overlay for s in page.segmentations if s.overlay)
+        for item in page.all_disagreements:
+            owned.update(value for value in (item.crop, item.crop_preview) if value)
+        for item in page.htr_comparisons:
+            owned.update(value for value in (item.crop, item.preview) if value)
+        page_files[page.id] = sorted(owned)
+    overview = corpus_overview(report, data_dir, min_reviewed_pages=min_reviewed_pages)
+    for name, context in (
+        ('index', {'report': report, 'title': 'Manuscript research report'}),
+        ('method', {'title': 'How this experiment works'}),
+        ('overview', {'overview': overview, 'report': report, 'labels': LABELS, 'title': 'Corpus overview'}),
+    ):
+        (destination / f'{name}.html').write_text(templates[name].render(
+            asset_prefix='', current_page=name, **context), encoding='utf-8')
+    return page_files
+
+
+def _safe_relative(value: str) -> bool:
+    path = Path(value)
+    return bool(value) and not path.is_absolute() and '..' not in path.parts and path.as_posix() == value
+
+
+def build_report(data_dir: Path, output_dir: Path, *, assets: Path | None = None,
+                 min_reviewed_pages: int = 5, manuscript_id: str | None = None) -> ReportData:
+    """Stage an offline build, then publish only generated files. Never write inputs."""
+    if min_reviewed_pages < 1:
+        raise ValueError('min_reviewed_pages must be positive')
+    raw_output = Path(output_dir).absolute()
+    if raw_output.is_symlink():
+        raise ValueError('Output directory must not be a symlink')
+    data_dir, output_dir = Path(data_dir).resolve(), raw_output.resolve()
+    assets = Path(assets).resolve() if assets else _asset_root().resolve()
+    for protected in (data_dir, assets / 'templates', assets / 'static', Path(__file__).resolve().parents[1]):
+        if output_dir == protected or output_dir in protected.parents or protected in output_dir.parents:
+            raise ValueError(f'Output overlaps a protected input directory: {protected}')
+    marker = output_dir / '.waqf-report.json'
+    previous = {}
+    if output_dir.exists():
+        if not output_dir.is_dir():
+            raise ValueError('Output must be a directory')
+        if any(p.is_symlink() for p in output_dir.rglob('*')):
+            raise ValueError('Output contains symlinks; refusing to overwrite or follow them')
+        existing = {p.name for p in output_dir.iterdir()} - {'.gitignore', '.gitkeep'}
+        if existing and not marker.is_file():
+            raise ValueError('Output directory is not empty and is not a previously generated report.')
+        if marker.is_file():
+            try:
+                previous = json.loads(marker.read_text(encoding='utf-8'))
+                if not isinstance(previous, dict):
+                    raise ValueError('expected an object')
+                if previous.get('version') not in (None, 2):
+                    raise ValueError('unsupported manifest version')
+                if not isinstance(previous.get('files', []), list):
+                    raise ValueError('files must be a list')
+                if any(not isinstance(v, str) or not _safe_relative(v) for v in previous.get('files', [])):
+                    raise ValueError('unsafe output file path')
+                if previous.get('version') == 2:
+                    if not isinstance(previous.get('page_files'), dict) or not isinstance(previous.get('figures'), dict):
+                        raise ValueError('page ownership and figures must be mappings')
+                    for values in previous['page_files'].values():
+                        if not isinstance(values, list) or any(v not in previous['files'] for v in values):
+                            raise ValueError('page ownership must reference generated files')
+                    for figures in previous['figures'].values():
+                        if not isinstance(figures, list):
+                            raise ValueError('page figures must be lists')
+                        for figure in figures:
+                            if not isinstance(figure, dict) or any(figure.get(key) not in previous['files'] for key in ('preview','thumbnail')):
+                                raise ValueError('figure paths must reference generated files')
+            except (OSError, ValueError, TypeError) as exc:
+                raise ValueError(f'Invalid report ownership manifest {marker}: {exc}') from exc
+    report = load_report_data(data_dir)
+    all_pages = report.pages
+    chosen = [p for p in all_pages if p.id == manuscript_id] if manuscript_id else all_pages
+    if manuscript_id and not chosen:
+        raise ValueError(f'No manuscript page found for {manuscript_id!r}; check --data and the page identifier')
+    if manuscript_id and previous and previous.get('version') != 2:
+        raise ValueError('Run a full build once to upgrade this report before using --manuscript')
+    retained_ids = set(previous.get('page_files', {})) if manuscript_id else set()
+    report.pages = [p for p in all_pages if not manuscript_id or p.id == manuscript_id or p.id in retained_ids]
+    # Restore only visual metadata for retained pages; their HTML/assets are not regenerated.
+    if manuscript_id:
+        for page in report.pages:
+            if page.id != manuscript_id:
+                for figure in previous.get('figures', {}).get(page.id, []):
+                    page.figures.append(ManuscriptImage(**figure))
+    with tempfile.TemporaryDirectory(prefix='waqf-report-') as temporary:
+        stage = Path(temporary)
+        per_page = _render_report(report, chosen, data_dir, stage, assets, min_reviewed_pages)
+        files = sorted(p.relative_to(stage).as_posix() for p in stage.rglob('*') if p.is_file())
+        previous_files = set(previous.get('files', []))
+        if previous and previous.get('version') is None:
+            # Migrate only known generated paths from the original report builder.
+            previous_files.update(f'manuscripts/{name}' for name in previous.get('pages', [])
+                                  if isinstance(name, str) and re.fullmatch(r'[0-9a-f]{20}\.html', name))
+            for directory in ('images', 'assets'):
+                previous_files.update(p.relative_to(output_dir).as_posix() for p in (output_dir / directory).glob('*.png')
+                    if re.fullmatch(r'(?:segmentation-|htr-)?[0-9a-f]{20,24}(?:-small|-preview)?\.png', p.name))
+            previous_files.update(name for name in ('index.html','method.html','overview.html','static/css/site.css') if (output_dir/name).is_file())
+        retained_files = set()
+        retained_pages = {}
+        if manuscript_id:
+            for key, values in previous.get('page_files', {}).items():
+                if key != manuscript_id and key in {p.id for p in report.pages}:
+                    if any(not isinstance(v, str) or not _safe_relative(v) for v in values):
+                        raise ValueError('Invalid retained page ownership paths')
+                    if any(not (output_dir / value).is_file() for value in values):
+                        raise ValueError(f'Retained output for {key} is missing; run a full build to restore it')
+                    retained_files.update(values)
+                    retained_pages[key] = values
+        generated = set(files) | retained_files
+        for relative in generated:
+            destination = output_dir / relative
+            if destination.exists() and relative not in previous_files:
+                raise ValueError(f'Refusing to overwrite an unowned file: {destination}')
+        output_dir.mkdir(parents=True, exist_ok=True)
+        # Byte-identical files are not touched; atomic replacement protects hard-linked inputs.
+        for relative in files:
+            destination = output_dir / relative
+            content = (stage / relative).read_bytes()
+            if destination.is_file() and destination.read_bytes() == content:
+                continue
             destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, destination)
-    (output_dir / "method.html").write_text(method_template.render(
-        asset_prefix="", current_page="method", title="How this experiment works"), encoding="utf-8")
-    (output_dir / "overview.html").write_text(overview_template.render(
-        overview=overview, report=report, labels=LABELS, asset_prefix="", current_page="overview", title="Corpus overview"), encoding="utf-8")
-    prepare_figures(report, data_dir, output_dir)
-    filenames = []
-    for manuscript in report.pages:
-        if manuscript.figures:
-            try:
-                render_htr_crops(manuscript.htr_comparisons, data_dir / manuscript.figures[0].source, output_dir)
-            except (OSError, ValueError) as exc:
-                report.issues.append(f"{manuscript.id}: HTR crops unavailable ({exc}).")
-            try:
-                illustrate_experiment(manuscript.segmentations, manuscript.all_disagreements,
-                                      data_dir / manuscript.figures[0].source, output_dir)
-            except (OSError, ValueError) as exc:
-                report.issues.append(f"{manuscript.id}: some experiment illustrations are unavailable ({exc}).")
-        destination = output_dir / "manuscripts" / manuscript.filename
-        if destination.is_symlink():
-            raise ValueError(f"Refusing symlink output: {destination}")
-        destination.write_text(page_template.render(page=manuscript, labels=LABELS, asset_prefix="../", title=f"Manuscript {manuscript.id}"), encoding="utf-8")
-        filenames.append(manuscript.filename)
-    (output_dir / "index.html").write_text(index_template.render(report=report, asset_prefix="", title="Manuscript research report"), encoding="utf-8")
-    # Only remove stale detail pages explicitly owned by a previous build.
-    if marker.exists():
-        previous = json.loads(marker.read_text(encoding="utf-8"))
-        for filename in previous.get("pages", []):
-            if isinstance(filename, str) and len(filename) == 25 and filename.endswith(".html") and all(c in "0123456789abcdef" for c in filename[:-5]):
-                stale = output_dir / "manuscripts" / filename
-                if filename not in filenames and stale.is_file() and not stale.is_symlink():
-                    stale.unlink()
-    marker.write_text(json.dumps({"pages": filenames}, indent=2) + "\n", encoding="utf-8")
+            with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as staged:
+                staged.write(content)
+                temp_path = Path(staged.name)
+            temp_path.replace(destination)
+        for relative in sorted(previous_files - generated):
+            stale = output_dir / relative
+            if stale.is_file():
+                stale.unlink()
+        manifest = {'version': 2, 'files': sorted(generated), 'page_files': {**retained_pages, **per_page},
+                    'figures': {p.id: [asdict(f) for f in p.figures] for p in report.pages}}
+        content = json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + '\n'
+        if not marker.is_file() or marker.read_text(encoding='utf-8') != content:
+            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=output_dir, delete=False) as staged:
+                staged.write(content)
+                temp_path = Path(staged.name)
+            temp_path.replace(marker)
     return report
+
+
+class ReportHandler(SimpleHTTPRequestHandler):
+    def list_directory(self, path):
+        self.send_error(403, 'Directory listing is disabled')
+        return None
+
+    def send_head(self):
+        target = Path(self.translate_path(self.path))
+        root = Path(self.directory).resolve()
+        if not target.resolve().is_relative_to(root) or any(p.is_symlink() for p in (target, *target.parents) if p != root):
+            self.send_error(403, 'Path is outside the generated report')
+            return None
+        return super().send_head()
+
+
+def serve_report(output_dir: Path, *, port: int = 8000) -> None:
+    root = Path(output_dir).resolve()
+    if not (root / 'index.html').is_file() or not (root / '.waqf-report.json').is_file():
+        raise ValueError('Generated report not found; run waqf-report build first')
+    if not 0 <= port <= 65535:
+        raise ValueError('Port must be between 0 and 65535')
+    with ThreadingHTTPServer(('127.0.0.1', port), partial(ReportHandler, directory=str(root))) as server:
+        print(f'Serving {root} at http://127.0.0.1:{server.server_port}/ (Ctrl-C to stop)', flush=True)
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -369,12 +499,19 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument("--data", type=Path, default=Path("data"))
     build.add_argument("--output", type=Path, default=Path("reports/generated"))
     build.add_argument("--min-reviewed-pages", type=int, default=5, help="Minimum paired, completely reviewed layout pages per run for aggregate metrics (default: 5; not a statistical guarantee)")
+    build.add_argument("--manuscript", help="Rebuild one exact page identifier; refresh shared indexes without rerendering other pages")
+    serve = subparsers.add_parser("serve", help="Serve the generated report on localhost; never builds or runs models")
+    serve.add_argument("--output", type=Path, default=Path("reports/generated"))
+    serve.add_argument("--port", type=int, default=8000)
     args = parser.parse_args(argv)
     try:
-        report = build_report(args.data, args.output, min_reviewed_pages=args.min_reviewed_pages)
-    except (OSError, ValueError) as exc:
-        parser.exit(1, f"Cannot build report: {exc}\n")
-    print(f"Built {len(report.pages)} manuscript page(s): {args.output / 'index.html'}")
+        if args.command == 'serve':
+            serve_report(args.output, port=args.port)
+            return 0
+        report = build_report(args.data, args.output, min_reviewed_pages=args.min_reviewed_pages, manuscript_id=args.manuscript)
+    except (OSError, ValueError, TypeError, KeyError, TemplateError) as exc:
+        parser.exit(1, f"Cannot {args.command} report: {exc}\n")
+    print(f"Built {1 if args.manuscript else len(report.pages)} manuscript page(s): {args.output / 'index.html'}")
     for issue in report.issues:
         print(f"Data issue: {issue}")
     return 0

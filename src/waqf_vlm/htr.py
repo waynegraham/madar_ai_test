@@ -90,7 +90,7 @@ def load_htr_comparisons(data: Path, page_id: str, issues: list[str]) -> list[HT
                     group.human = Reading('Human transcription', item['transcription'], group.region_source,
                                           item.get('script'), item.get('language'), linkage='Explicit human_corrected transcription')
                 groups.append(group)
-        except (ValueError, KeyError, TypeError, OSError) as exc:
+        except (ValueError, KeyError, TypeError, AttributeError, OSError) as exc:
             issues.append(f'{annotation_path.relative_to(data)}: HTR region references unavailable ({exc}).')
 
     corrected_path = data / 'ground-truth' / 'alto' / f'{page_id}.xml'
@@ -135,7 +135,7 @@ def load_htr_comparisons(data: Path, page_id: str, issues: list[str]) -> list[HT
                 continue
             matches[0].readings.append(Reading(system_name(str(saved.get('model') or path.parent.parent.name)),
                 response['transcription'], path.relative_to(data).as_posix(), response.get('script'), response.get('language')))
-        except (ValueError, TypeError, OSError) as exc:
+        except (ValueError, TypeError, AttributeError, OSError) as exc:
             if is_htr:
                 issues.append(f'{path.relative_to(data)}: HTR comparison could not load this result ({exc}).')
 

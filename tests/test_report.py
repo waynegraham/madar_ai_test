@@ -71,7 +71,8 @@ class ReportTests(unittest.TestCase):
     def test_missing_and_invalid_data_visible(self):
         self.write("results/page/model/broken.json", "not json")
         report = build_report(self.data, self.output)
-        self.assertEqual(len(report.issues), 1)
+        self.assertTrue(any("could not load saved experiment" in issue for issue in report.issues))
+        self.assertTrue(any("original image unavailable" in issue for issue in report.issues))
         self.assertIn("Records needing attention", (self.output / "index.html").read_text())
         with self.assertRaises(ValueError):
             load_report_data(self.root / "missing")
