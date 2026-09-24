@@ -6,15 +6,16 @@
 {% macro htr_component(page, labels) -%}
 <section aria-labelledby="htr-comparison" class="htr-section">
 <div class="section-heading"><p class="eyebrow">From image to text</p><h2 id="htr-comparison">Comparing transcriptions</h2></div>
-<p>Handwritten text recognition (HTR) proposes a reading of a manuscript passage. These comparisons use saved results linked to human-defined or human-corrected regions. Read the image alongside the transcriptions: script and language identifications supplied by a model remain suggestions.</p>
+<p>Handwritten text recognition (HTR) proposes a reading of a manuscript passage. These comparisons use saved results linked to documented input regions. Read the image alongside the transcriptions: script and language identifications supplied by a model remain suggestions.</p>
 {% for group in page.htr_comparisons %}
 <article class="htr-comparison" aria-labelledby="htr-{{ group.identifier }}">
 <h3 id="htr-{{ group.identifier }}">{{ labels.get(group.region.region_type, group.region.region_type) }} <span class="region-identifier">{{ group.region.id }}</span></h3>
 {% if group.crop %}<figure class="manuscript-figure htr-crop"><a class="figure-link" href="../{{ group.crop }}" aria-label="Inspect original-resolution text crop for {{ group.region.id }}"><img src="../{{ group.preview }}" alt="Text region {{ group.region.id }} from manuscript {{ page.id }}, shown for comparison with the transcriptions below." width="{{ group.crop_width }}" height="{{ group.crop_height }}" loading="lazy"></a><figcaption class="figure-caption">Region defined in <code>{{ group.region_source }}</code>. Cropped from <code>{{ page.figures[0].source }}</code> with up to 30 pixels of context per edge. <a href="../{{ group.crop }}">Full-resolution crop</a>: {{ group.crop_width }} × {{ group.crop_height }} pixels.</figcaption></figure>{% else %}<p class="image-unavailable">High-resolution region crop unavailable.</p>{% endif %}
 <div class="htr-human-reading"><h4>Human transcription</h4>
-{% if group.human is not none %}<span class="human-reviewed-label">Human corrected</span>{{ reading_text(group.human) }}{% else %}<p class="review-pending-label">Not yet available.</p><p class="scholarly-note">A human-defined region does not supply a human transcription. No accuracy or error-rate calculation is made for this region.</p>{% endif %}
+{% if group.human is not none %}<span class="human-reviewed-label">Human corrected</span>{{ reading_text(group.human) }}{% else %}<p class="review-pending-label">Not yet available.</p><p class="scholarly-note">Input regions may come from unreviewed machine layout or the whole image. They do not supply a human transcription. No accuracy or error-rate calculation is made for this region.</p>{% endif %}
 </div>
 {% for reading in group.readings %}<div class="htr-system-reading"><h4>{{ reading.system }}</h4><span class="model-label">Machine suggested</span>{{ reading_text(reading) }}</div>{% endfor %}
+{% for failure in group.failures %}<p class="scholarly-note">{{ failure.system }}: inference failed or returned an incomplete/invalid response; no transcription or error rate is available. Failure record: <code>{{ failure.source }}</code>.</p>{% endfor %}
 {% if not group.readings|selectattr('system', 'equalto', 'eScriptorium')|list %}<p class="scholarly-note">eScriptorium: no saved transcription could be linked unambiguously to this region. A larger overlapping page block is not substituted for a region reading.</p>{% endif %}
 {% if group.human is not none %}
 <details class="technical-details htr-metrics"><summary>Transcription error measures against the human reference</summary>
@@ -25,7 +26,7 @@
 {% if group.human.text == '' %}<p>The reviewed reference is explicitly empty. The existing evaluator assigns 0 for an empty hypothesis and 1 for a nonempty hypothesis against an empty reference.</p>{% endif %}
 </details>{% endif %}
 <details class="technical-details"><summary>Transcription sources and comparison policy</summary><p>Saved text is displayed without editorial correction, translation, or Unicode normalization. Line breaks are preserved. ALTO text is assembled in XML line order using the existing parser, with newlines between lines. Region associations use an explicit saved ID or a uniquely matching crop filename; ALTO associations require a stable ID or a unique reciprocal bounding-box match at IoU ≥ 0.95.</p>
-<p>This display crop is generated from the current human region and original image. It does not reconstruct unrecorded inference settings or guarantee that historical crop boundaries were unchanged.</p>
+<p>This display crop is generated from the saved input region and original image. It does not reconstruct unrecorded inference settings or guarantee that historical crop boundaries were unchanged.</p>
 <ul>{% if group.human is not none %}<li>Human reference: <code>{{ group.human.source }}</code>. {{ group.human.linkage }}.</li>{% endif %}{% for reading in group.readings %}<li>{{ reading.system }}: <code>{{ reading.source }}</code>. {{ reading.linkage }}.</li>{% endfor %}</ul></details>
 </article>
 {% else %}<p>Saved HTR results linked to human-defined or human-corrected text regions are not available for this manuscript image.</p>{% endfor %}

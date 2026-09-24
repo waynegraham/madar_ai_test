@@ -1,0 +1,88 @@
+{
+  "image": "00007-97-AB008730.tif",
+  "coordinate_system": "normalized-1000",
+  "region_source": "alto/00007-97-AB008730.xml (machine layout; unreviewed)",
+  "padding": 30,
+  "regions": [
+    {
+      "id": "eSc_textblock_9a40c9e2",
+      "type": "handwritten_annotation",
+      "bbox": [
+        725.597609561753,
+        12.855209742895806,
+        966.1354581673307,
+        114.00541271989174
+      ]
+    },
+    {
+      "id": "eSc_textblock_e7e212f3",
+      "type": "main_text",
+      "bbox": [
+        99.10358565737052,
+        87.28010825439783,
+        876.99203187251,
+        780.784844384303
+      ]
+    },
+    {
+      "id": "eSc_textblock_d52a61f8",
+      "type": "handwritten_annotation",
+      "bbox": [
+        293.32669322709165,
+        3.044654939106901,
+        750.0,
+        130.92016238159675
+      ]
+    },
+    {
+      "id": "eSc_textblock_339c70f1",
+      "type": "handwritten_annotation",
+      "bbox": [
+        367.52988047808765,
+        771.3125845737483,
+        734.0637450199204,
+        966.508795669824
+      ]
+    },
+    {
+      "id": "eSc_textblock_9e27c263",
+      "type": "handwritten_annotation",
+      "bbox": [
+        69.22310756972111,
+        636.6711772665764,
+        275.89641434262944,
+        773.342354533153
+      ]
+    },
+    {
+      "id": "eSc_textblock_757daa08",
+      "type": "stamp_or_seal",
+      "bbox": [
+        127.49003984063745,
+        775.0338294993235,
+        424.800796812749,
+        967.8619756427604
+      ]
+    },
+    {
+      "id": "eSc_textblock_fa0e8a4b",
+      "type": "stamp_or_seal",
+      "bbox": [
+        685.2589641434263,
+        776.7253044654939,
+        993.5258964143426,
+        974.2895805142084
+      ]
+    },
+    {
+      "id": "eSc_textblock_9e254911",
+      "type": "main_text",
+      "bbox": [
+        313.7450199203187,
+        0.0,
+        386.45418326693226,
+        2.368064952638701
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+CONFIDENCE SCORING
+
+Confidence scores indicate your confidence in your own analysis,
+not the probability that the text is objectively correct.
+
+Use values from 0.0 to 1.0.
+
+0.90–1.00:
+Reading/interpretation is highly conventional and there is little
+reasonable ambiguity.
+
+0.70–0.89:
+Good evidence supports the interpretation, but alternatives exist.
+
+0.50–0.69:
+Interpretation is plausible but materially uncertain.
+
+0.30–0.49:
+Interpretation is speculative or depends heavily on context.
+
+0.00–0.29:
+Unable to establish the reading or meaning reliably.
+
+Do not increase confidence simply because an interpretation produces
+fluent English.
+
+When multiple interpretations are plausible, lower the confidence
+of the selected interpretation and record the alternatives.
+
+Never assign high confidence to a word whose source reading is itself
+uncertain.

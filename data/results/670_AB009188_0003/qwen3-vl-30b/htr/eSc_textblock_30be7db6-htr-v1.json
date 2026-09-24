@@ -1,0 +1,27 @@
+{
+  "page_id": "670_AB009188_0003",
+  "region_id": "eSc_textblock_30be7db6",
+  "region_bbox": [
+    23.730070448646643,
+    73.18972229431611,
+    895.0685947348907,
+    355.82662860109
+  ],
+  "region_source": "htr-inputs/670_AB009188_0003.json",
+  "image_sha256": "b933ae6a10f2a8062cc5389c83f8af5ece2da43b2ed8279e7c769dfd4da04467",
+  "model": "qwen3-vl-30b-a3b-instruct-mlx",
+  "task": "htr",
+  "prompt_version": "htr-v1",
+  "image": "data/crops/670_AB009188_0003/eSc_textblock_30be7db6.png",
+  "prompt": "You are transcribing a cropped region from a historical\nArabic-script archival document.\n\nProduce a diplomatic transcription of the visible text.\n\nRequirements:\n\n- Preserve the original spelling.\n- Preserve the original language.\n- Do not translate.\n- Do not modernize spelling.\n- Do not silently correct grammar.\n- Do not invent missing text.\n- Use [?] for text that cannot be read with reasonable confidence.\n- Preserve line breaks where they are visually apparent.\n\nAlso identify the script and probable language.\n\nReturn ONLY valid JSON:\n\n{\n  \"script\": \"...\",\n  \"language\": \"...\",\n  \"transcription\": \"...\",\n  \"confidence\": 0.0\n}",
+  "response": {
+    "script": "Arabic",
+    "language": "Arabic",
+    "transcription": "اوقفت وتصدت بهذا المصحف الشريف التم تريم قلفد لوجهه على من يتفع من المسلمين والجاورين باحومين الشريفين وشرطت انه بعد القرايه يفرّ الفاتحه وبهدى ثوابا الى روح الواقفه المذلورة وقفها صحيحا شرعا لا يبدل ولا يغير فمن بدلله بعد ما سمعه فانما اغده على الذين يدلونه ان الله سميع عليم ترى 2 . هبته بجود",
+    "confidence": 0.95
+  },
+  "raw_content": "```json\n{\n  \"script\": \"Arabic\",\n  \"language\": \"Arabic\",\n  \"transcription\": \"اوقفت وتصدت بهذا المصحف الشريف التم تريم قلفد لوجهه على من يتفع من المسلمين والجاورين باحومين الشريفين وشرطت انه بعد القرايه يفرّ الفاتحه وبهدى ثوابا الى روح الواقفه المذلورة وقفها صحيحا شرعا لا يبدل ولا يغير فمن بدلله بعد ما سمعه فانما اغده على الذين يدلونه ان الله سميع عليم ترى 2 . هبته بجود\",\n  \"confidence\": 0.95\n}\n```",
+  "elapsed_seconds": 5.783353417005856,
+  "temperature": 0.0,
+  "max_tokens": 4096
+}

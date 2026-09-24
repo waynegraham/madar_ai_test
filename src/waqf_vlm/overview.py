@@ -39,6 +39,7 @@ def corpus_overview(report, data_dir: Path, *, min_reviewed_pages: int = 5) -> d
     htr_evaluated = set()
     htr_pairs = 0
     htr_pages = set()
+    htr_runs = defaultdict(Counter)
     paired = defaultdict(list)
     excluded_ambiguous = 0
     for page in report.pages:
@@ -73,7 +74,12 @@ def corpus_overview(report, data_dir: Path, *, min_reviewed_pages: int = 5) -> d
             local_runs[run].append(system)
         for group in page.htr_comparisons:
             key = (page.id, group.region_source, group.region.id)
-            htr_available.add(key)
+            if group.readings:
+                htr_available.add(key)
+            for reading in group.readings:
+                htr_runs[reading.system]['readings'] += 1
+            for failure in group.failures:
+                htr_runs[failure['system']]['failures'] += 1
             evaluated = [r for r in group.readings if r.metrics is not None]
             if evaluated:
                 htr_evaluated.add(key)
@@ -122,6 +128,7 @@ def corpus_overview(report, data_dir: Path, *, min_reviewed_pages: int = 5) -> d
         'prediction_records': prediction_records, 'segmented_pages': len(set().union(*run_pages.values())) if run_pages else 0,
         'htr_available': len(htr_available), 'htr_evaluated': len(htr_evaluated),
         'htr_evaluated_pages': len(htr_pages), 'htr_pairs': htr_pairs,
+        'htr_runs': dict(sorted(htr_runs.items())),
         'minimum_pages': min_reviewed_pages, 'evaluations': evaluations, 'eligible': eligible,
         'excluded_ambiguous': excluded_ambiguous,
     }

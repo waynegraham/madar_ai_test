@@ -866,8 +866,9 @@ limited to 900 pixels for inline display; no model inference is involved.
 Manuscript pages now show a crop followed by the human transcription (when
 available) and each saved system reading. `src/waqf_vlm/htr.py` groups results by
 an explicit `region_id` or the legacy `crops/<page>/<region-id>.png` input path.
-Only human-defined JSON regions or human-corrected ALTO blocks qualify; ambiguous
-or missing links are reported instead of guessed. Larger machine ALTO blocks are
+Human-defined JSON regions, human-corrected ALTO blocks, and frozen batch inputs
+from `data/htr-inputs/` qualify as layout links; ambiguous or missing links are
+reported instead of guessed. Frozen inputs alone never supply reviewed text. Larger machine ALTO blocks are
 not substituted for a passage. Matching ALTO blocks require the same stable ID
 or unique reciprocal bounding-box IoU of at least 0.95.
 
@@ -945,3 +946,35 @@ threshold, not a claim of statistical sufficiency; rare types may still have ver
 small samples. Reviewed-page coverage can include partial references, whereas
 layout evaluation requires documented complete coverage. No corpus-level score
 is invented when those conditions are not met.
+
+### Batch HTR with Qwen 8B and 30B
+
+Run both locally installed LM Studio models across all project images:
+
+```bash
+lms server start
+uv run python -m src.waqf_vlm.run_htr
+uv run waqf-report build --data data --output docs
+```
+
+The batch runner freezes shared input regions in `data/htr-inputs/`, using human
+layout JSON when available, otherwise existing machine ALTO blocks, otherwise
+the full image. All non-illustration blocks (including seals and unknown types)
+are included. It crops original-resolution images with 30 pixels of padding and
+uses the same prompt, crops, temperature (0), and token limit (4096) for both
+models. Only image pixels and the HTR prompt are submitted, never ALTO text.
+Results include explicit region IDs, crop hashes, inference settings, and timing.
+Successful results are saved after each request; rerunning skips matching results
+and retries missing ones. Invalid or incomplete responses are recorded separately
+in `data/htr-errors/` and shown as failures in the report. Changed inputs do not silently overwrite saved results.
+Use `--prepare-only` to create crops without inference, or `--model qwen3-vl-8b`
+(or `qwen3-vl-30b`) to run just one model.
+
+The report also accepts these frozen input regions, which are **not ground truth**.
+To add reviewed eScriptorium transcriptions later, place corrected ALTO exports
+at `data/ground-truth/alto/<image-stem>.xml` and rebuild the report. Keep the original
+block IDs and boundaries where possible: automatic reference linkage requires a
+stable ID or a unique reciprocal bounding-box IoU ≥ 0.95. Split/merged blocks need
+explicit alignment before their error rates can be compared. Machine exports
+belong in `data/alto/` or `data/predictions/escriptorium/`. CER/WER remain unavailable
+until a human-corrected reference is linked.

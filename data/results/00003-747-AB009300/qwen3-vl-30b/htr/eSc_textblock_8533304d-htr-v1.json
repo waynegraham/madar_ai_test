@@ -1,0 +1,27 @@
+{
+  "page_id": "00003-747-AB009300",
+  "region_id": "eSc_textblock_8533304d",
+  "region_bbox": [
+    40.229885057471265,
+    384.29978118161927,
+    293.10344827586204,
+    557.7133479212254
+  ],
+  "region_source": "htr-inputs/00003-747-AB009300.json",
+  "image_sha256": "df2be760ff5b7e055731e6b401fb2bd394e1459be885196ffe830ce6abfcdc47",
+  "model": "qwen3-vl-30b-a3b-instruct-mlx",
+  "task": "htr",
+  "prompt_version": "htr-v1",
+  "image": "data/crops/00003-747-AB009300/eSc_textblock_8533304d.png",
+  "prompt": "You are transcribing a cropped region from a historical\nArabic-script archival document.\n\nProduce a diplomatic transcription of the visible text.\n\nRequirements:\n\n- Preserve the original spelling.\n- Preserve the original language.\n- Do not translate.\n- Do not modernize spelling.\n- Do not silently correct grammar.\n- Do not invent missing text.\n- Use [?] for text that cannot be read with reasonable confidence.\n- Preserve line breaks where they are visually apparent.\n\nAlso identify the script and probable language.\n\nReturn ONLY valid JSON:\n\n{\n  \"script\": \"...\",\n  \"language\": \"...\",\n  \"transcription\": \"...\",\n  \"confidence\": 0.0\n}",
+  "response": {
+    "script": "Arabic",
+    "language": "Arabic",
+    "transcription": "الله",
+    "confidence": 0.9
+  },
+  "raw_content": "```json\n{\n  \"script\": \"Arabic\",\n  \"language\": \"Arabic\",\n  \"transcription\": \"الله\",\n  \"confidence\": 0.9\n}\n```",
+  "elapsed_seconds": 1.2667722079931991,
+  "temperature": 0.0,
+  "max_tokens": 4096
+}

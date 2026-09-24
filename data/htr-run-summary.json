@@ -1,0 +1,132 @@
+{
+  "prompt_version": "htr-v1",
+  "ground_truth_status": "pending",
+  "pages": [
+    {
+      "page_id": "00003-1345-AB009712",
+      "regions": 7,
+      "models": {
+        "qwen3-vl-8b": {
+          "saved_readings": 5,
+          "failed_attempts": 2,
+          "empty_readings": 2
+        },
+        "qwen3-vl-30b": {
+          "saved_readings": 7,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        }
+      }
+    },
+    {
+      "page_id": "00003-747-AB009300",
+      "regions": 7,
+      "models": {
+        "qwen3-vl-8b": {
+          "saved_readings": 4,
+          "failed_attempts": 3,
+          "empty_readings": 0
+        },
+        "qwen3-vl-30b": {
+          "saved_readings": 7,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        }
+      }
+    },
+    {
+      "page_id": "00007-97-AB008730",
+      "regions": 8,
+      "models": {
+        "qwen3-vl-8b": {
+          "saved_readings": 6,
+          "failed_attempts": 2,
+          "empty_readings": 1
+        },
+        "qwen3-vl-30b": {
+          "saved_readings": 8,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        }
+      }
+    },
+    {
+      "page_id": "1280_AB010309_0005",
+      "regions": 11,
+      "models": {
+        "qwen3-vl-8b": {
+          "saved_readings": 6,
+          "failed_attempts": 5,
+          "empty_readings": 2
+        },
+        "qwen3-vl-30b": {
+          "saved_readings": 11,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        }
+      }
+    },
+    {
+      "page_id": "436_AB008999_0003",
+      "regions": 5,
+      "models": {
+        "qwen3-vl-8b": {
+          "saved_readings": 4,
+          "failed_attempts": 1,
+          "empty_readings": 2
+        },
+        "qwen3-vl-30b": {
+          "saved_readings": 5,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        }
+      }
+    },
+    {
+      "page_id": "670_AB009188_0003",
+      "regions": 11,
+      "models": {
+        "qwen3-vl-8b": {
+          "saved_readings": 4,
+          "failed_attempts": 7,
+          "empty_readings": 2
+        },
+        "qwen3-vl-30b": {
+          "saved_readings": 11,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        }
+      }
+    },
+    {
+      "page_id": "Buchanan MSS1P9267fFA2",
+      "regions": 1,
+      "models": {
+        "qwen3-vl-8b": {
+          "saved_readings": 1,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        },
+        "qwen3-vl-30b": {
+          "saved_readings": 1,
+          "failed_attempts": 0,
+          "empty_readings": 0
+        }
+      }
+    }
+  ],
+  "models": {
+    "qwen3-vl-8b": {
+      "model": "qwen3-vl-8b-instruct-mlx",
+      "saved_readings": 30,
+      "failed_attempts": 20,
+      "empty_readings": 9
+    },
+    "qwen3-vl-30b": {
+      "model": "qwen3-vl-30b-a3b-instruct-mlx",
+      "saved_readings": 50,
+      "failed_attempts": 0,
+      "empty_readings": 0
+    }
+  }
+}

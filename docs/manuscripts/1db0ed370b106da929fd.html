@@ -77,18 +77,85 @@
 </section>
 <section aria-labelledby="htr-comparison" class="htr-section">
 <div class="section-heading"><p class="eyebrow">From image to text</p><h2 id="htr-comparison">Comparing transcriptions</h2></div>
-<p>Handwritten text recognition (HTR) proposes a reading of a manuscript passage. These comparisons use saved results linked to human-defined or human-corrected regions. Read the image alongside the transcriptions: script and language identifications supplied by a model remain suggestions.</p>
-<p>Saved HTR results linked to human-defined or human-corrected text regions are not available for this manuscript image.</p>
+<p>Handwritten text recognition (HTR) proposes a reading of a manuscript passage. These comparisons use saved results linked to documented input regions. Read the image alongside the transcriptions: script and language identifications supplied by a model remain suggestions.</p>
+
+<article class="htr-comparison" aria-labelledby="htr-912ff4cb667d9c59">
+<h3 id="htr-912ff4cb667d9c59">Main text <span class="region-identifier">whole-page</span></h3>
+<figure class="manuscript-figure htr-crop"><a class="figure-link" href="../assets/htr-1d40c7b7a3a5ba84f6145909.png" aria-label="Inspect original-resolution text crop for whole-page"><img src="../assets/htr-1d40c7b7a3a5ba84f6145909-preview.png" alt="Text region whole-page from manuscript Buchanan MSS1P9267fFA2, shown for comparison with the transcriptions below." width="1844" height="2472" loading="lazy"></a><figcaption class="figure-caption">Region defined in <code>htr-inputs/Buchanan MSS1P9267fFA2.json</code>. Cropped from <code>images/Buchanan MSS1P9267fFA2.jpg</code> with up to 30 pixels of context per edge. <a href="../assets/htr-1d40c7b7a3a5ba84f6145909.png">Full-resolution crop</a>: 1844 × 2472 pixels.</figcaption></figure>
+<div class="htr-human-reading"><h4>Human transcription</h4>
+<p class="review-pending-label">Not yet available.</p><p class="scholarly-note">Input regions may come from unreviewed machine layout or the whole image. They do not supply a human transcription. No accuracy or error-rate calculation is made for this region.</p>
+</div>
+<div class="htr-system-reading"><h4>Qwen3-VL 8B</h4><span class="model-label">Machine suggested</span><div class="transcription htr-transcription" dir="ltr">Bungeba Col
+Date
+To thra Expence of patchen for 3
+Gregours from South Carolina
+Twenty five Days at 1 shiler 1/4d
+To 3 Shourts for ladnegry 180
+To 3 pance of Suy for lad negro 180
+To a Cote gatit and Brichy for
+none of their negry — 100
+To minting of worn neger garle 2180
+Given monthly at 4 philipps.</div>
+<p class="reading-identification">Script: Latin · Language: English</p></div><div class="htr-system-reading"><h4>Qwen3-VL 30B</h4><span class="model-label">Machine suggested</span><div class="transcription htr-transcription" dir="ltr">Bungeba Col - Date
+To thra expense of patchen for 3
+negros from South Carolina
+twenty five days at 1 shiler 500
+To 3 Shourty for Lad negros 180
+To 3 pance of Luy for lad negro 180
+To a coti gatit and brichy for
+one of ther negros - 100
+To minting of wome negen gade 3180
+Given months at 4 Shiler month)</div>
+<p class="reading-identification">Script: Latin · Language: English</p></div>
+
+<p class="scholarly-note">eScriptorium: no saved transcription could be linked unambiguously to this region. A larger overlapping page block is not substituted for a region reading.</p>
+
+<details class="technical-details"><summary>Transcription sources and comparison policy</summary><p>Saved text is displayed without editorial correction, translation, or Unicode normalization. Line breaks are preserved. ALTO text is assembled in XML line order using the existing parser, with newlines between lines. Region associations use an explicit saved ID or a uniquely matching crop filename; ALTO associations require a stable ID or a unique reciprocal bounding-box match at IoU ≥ 0.95.</p>
+<p>This display crop is generated from the saved input region and original image. It does not reconstruct unrecorded inference settings or guarantee that historical crop boundaries were unchanged.</p>
+<ul><li>Qwen3-VL 8B: <code>results/Buchanan MSS1P9267fFA2/qwen3-vl-8b/htr/whole-page-htr-v1.json</code>. Saved region identifier.</li><li>Qwen3-VL 30B: <code>results/Buchanan MSS1P9267fFA2/qwen3-vl-30b/htr/whole-page-htr-v1.json</code>. Saved region identifier.</li></ul></details>
+</article>
+
 </section>
 <section aria-labelledby="technical"><h2 id="technical">Technical details</h2>
 <details class="technical-details"><summary>Experiment records, processing information, and saved readings</summary>
 <p>All results were loaded from existing files. No model was run to produce this page. Display overlays use normalized 0–1000 bounding boxes mapped onto a proportionally resized source image. Source crops use original image coordinates. Input dimensions below describe the saved input file currently on disk, not independently verified run-time metadata.</p>
-<article class="research-record"><h3>Page layout</h3><div class="labels" aria-label="Origin and review status">
+<article class="research-record"><h3>Transcription, script and language</h3><div class="labels" aria-label="Origin and review status">
+  <span class="model-label">Machine suggested</span>
+  <span class="review-pending-label">Not yet reviewed</span>
+</div><dl><dt>System or annotation source</dt><dd>qwen3-vl-30b-a3b-instruct-mlx</dd><dt>Task</dt><dd>htr</dd><dt>Prompt version</dt><dd>htr-v1</dd><dt>Input image</dt><dd>data/crops/Buchanan MSS1P9267fFA2/whole-page.png</dd><dt>Recorded duration (seconds)</dt><dd>8.257189374999143</dd><dt>Suggested script</dt><dd>Latin</dd><dt>Suggested language</dt><dd>English</dd><dt>Model name</dt><dd>qwen3-vl-30b-a3b-instruct-mlx</dd><dt>Quantization</dt><dd>Unavailable — not recorded</dd><dt>Temperature</dt><dd>0.0</dd><dt>Maximum tokens</dt><dd>4096</dd><dt>Input dimensions</dt><dd>Unavailable</dd><dt>Saved source</dt><dd><code>results/Buchanan MSS1P9267fFA2/qwen3-vl-30b/htr/whole-page-htr-v1.json</code></dd></dl>
+<p class="scholarly-note">Machine suggested. These suggestions have not been verified against a human-reviewed reference.</p><p class="scholarly-note">Script and language are shown exactly as supplied by the model; a script name and a calligraphic style may not be equivalent.</p>
+<details class="technical-details"><summary>Saved suggested text — not a verified reading</summary><div class="transcription" dir="auto">Bungeba Col - Date
+To thra expense of patchen for 3
+negros from South Carolina
+twenty five days at 1 shiler 500
+To 3 Shourty for Lad negros 180
+To 3 pance of Luy for lad negro 180
+To a coti gatit and brichy for
+one of ther negros - 100
+To minting of wome negen gade 3180
+Given months at 4 Shiler month)</div></details>
+</article><article class="research-record"><h3>Page layout</h3><div class="labels" aria-label="Origin and review status">
   <span class="model-label">Machine suggested</span>
   <span class="review-pending-label">Not yet reviewed</span>
 </div><dl><dt>System or annotation source</dt><dd>qwen3-vl-30b-a3b-instruct-mlx</dd><dt>Task</dt><dd>segmentation</dd><dt>Prompt version</dt><dd>segmentation-v1</dd><dt>Input image</dt><dd>../data/derivatives/Buchanan MSS1P9267fFA2.png</dd><dt>Recorded duration (seconds)</dt><dd>13.241898457999923</dd><dt>Regions</dt><dd>1</dd><dt>Model name</dt><dd>qwen3-vl-30b-a3b-instruct-mlx</dd><dt>Quantization</dt><dd>Unavailable — not recorded</dd><dt>Temperature</dt><dd>Unavailable — not recorded</dd><dt>Maximum tokens</dt><dd>Unavailable — not recorded</dd><dt>Input dimensions</dt><dd>Unavailable</dd><dt>Saved source</dt><dd><code>results/Buchanan MSS1P9267fFA2/qwen3-vl-30b/segmentation-v1.json</code></dd></dl>
 <p class="scholarly-note">Machine suggested. These suggestions have not been verified against a human-reviewed reference.</p>
 
+</article><article class="research-record"><h3>Transcription, script and language</h3><div class="labels" aria-label="Origin and review status">
+  <span class="model-label">Machine suggested</span>
+  <span class="review-pending-label">Not yet reviewed</span>
+</div><dl><dt>System or annotation source</dt><dd>qwen3-vl-8b-instruct-mlx</dd><dt>Task</dt><dd>htr</dd><dt>Prompt version</dt><dd>htr-v1</dd><dt>Input image</dt><dd>data/crops/Buchanan MSS1P9267fFA2/whole-page.png</dd><dt>Recorded duration (seconds)</dt><dd>7.506857165994006</dd><dt>Suggested script</dt><dd>Latin</dd><dt>Suggested language</dt><dd>English</dd><dt>Model name</dt><dd>qwen3-vl-8b-instruct-mlx</dd><dt>Quantization</dt><dd>Unavailable — not recorded</dd><dt>Temperature</dt><dd>0.0</dd><dt>Maximum tokens</dt><dd>4096</dd><dt>Input dimensions</dt><dd>Unavailable</dd><dt>Saved source</dt><dd><code>results/Buchanan MSS1P9267fFA2/qwen3-vl-8b/htr/whole-page-htr-v1.json</code></dd></dl>
+<p class="scholarly-note">Machine suggested. These suggestions have not been verified against a human-reviewed reference.</p><p class="scholarly-note">Script and language are shown exactly as supplied by the model; a script name and a calligraphic style may not be equivalent.</p>
+<details class="technical-details"><summary>Saved suggested text — not a verified reading</summary><div class="transcription" dir="auto">Bungeba Col
+Date
+To thra Expence of patchen for 3
+Gregours from South Carolina
+Twenty five Days at 1 shiler 1/4d
+To 3 Shourts for ladnegry 180
+To 3 pance of Suy for lad negro 180
+To a Cote gatit and Brichy for
+none of their negry — 100
+To minting of worn neger garle 2180
+Given monthly at 4 philipps.</div></details>
 </article><article class="research-record"><h3>Page layout</h3><div class="labels" aria-label="Origin and review status">
   <span class="model-label">Machine suggested</span>
   <span class="review-pending-label">Not yet reviewed</span>

@@ -1,0 +1,22 @@
+Analyze this historical text as a textual scholar.
+
+The text may contain historical Arabic, Ottoman Turkish, Persian,
+or mixtures of these languages.
+
+Do NOT translate the passage into English at this stage.
+
+For each segment:
+1. Identify the probable language and historical register.
+2. Reproduce the supplied text exactly.
+3. Identify uncertain readings.
+4. Identify possible transcription/HTR errors, but do not silently
+   correct them.
+5. Give proposed normalization separately from the supplied text.
+6. Explain significant historical vocabulary, morphology, syntax,
+   formulae, and code-switching.
+7. Give plausible alternative readings where appropriate.
+8. Mark your confidence in each interpretation.
+
+Do not assume modern Arabic, modern Turkish, or modern Persian.
+Do not resolve ambiguity merely because one reading produces a
+more sensible meaning.

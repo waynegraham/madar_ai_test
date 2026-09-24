@@ -1,0 +1,18 @@
+{
+  "image": "Buchanan MSS1P9267fFA2.jpg",
+  "coordinate_system": "normalized-1000",
+  "region_source": "Whole image (no region layout available)",
+  "padding": 30,
+  "regions": [
+    {
+      "id": "whole-page",
+      "type": "main_text",
+      "bbox": [
+        0,
+        0,
+        1000,
+        1000
+      ]
+    }
+  ]
+}

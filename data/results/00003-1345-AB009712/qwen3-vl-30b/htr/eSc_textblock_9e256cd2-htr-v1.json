@@ -1,0 +1,27 @@
+{
+  "page_id": "00003-1345-AB009712",
+  "region_id": "eSc_textblock_9e256cd2",
+  "region_bbox": [
+    193.8414941948511,
+    53.03828591499824,
+    899.0408884401817,
+    598.8760098349139
+  ],
+  "region_source": "htr-inputs/00003-1345-AB009712.json",
+  "image_sha256": "0d50331a3f04cda08009efd2b37e9aafd164cbb560ba311e8b8055a5dee9aaa2",
+  "model": "qwen3-vl-30b-a3b-instruct-mlx",
+  "task": "htr",
+  "prompt_version": "htr-v1",
+  "image": "data/crops/00003-1345-AB009712/eSc_textblock_9e256cd2.png",
+  "prompt": "You are transcribing a cropped region from a historical\nArabic-script archival document.\n\nProduce a diplomatic transcription of the visible text.\n\nRequirements:\n\n- Preserve the original spelling.\n- Preserve the original language.\n- Do not translate.\n- Do not modernize spelling.\n- Do not silently correct grammar.\n- Do not invent missing text.\n- Use [?] for text that cannot be read with reasonable confidence.\n- Preserve line breaks where they are visually apparent.\n\nAlso identify the script and probable language.\n\nReturn ONLY valid JSON:\n\n{\n  \"script\": \"...\",\n  \"language\": \"...\",\n  \"transcription\": \"...\",\n  \"confidence\": 0.0\n}",
+  "response": {
+    "script": "Naskh",
+    "language": "Arabic",
+    "transcription": "نفيه نفغة ده فَرِدْ بَلَّهُ يَعْبَدُ مَا سَمِعَهُ فَإِنَّمَا الْإِثْمُ عَلَى الدَّيِرِ يَبِدُ لَوْنُهُ إِذَا اللَّهُ سَمِعَ عَلَيْهِ صاحب الحدود والحسنات وراغب المجنَة والدرجات على الشّفقة بن عابدين ك أكن جزيرة الكريد قندي درحله سوري جشمه",
+    "confidence": 0.95
+  },
+  "raw_content": "```json\n{\n  \"script\": \"Naskh\",\n  \"language\": \"Arabic\",\n  \"transcription\": \"نفيه نفغة ده فَرِدْ بَلَّهُ يَعْبَدُ مَا سَمِعَهُ فَإِنَّمَا الْإِثْمُ عَلَى الدَّيِرِ يَبِدُ لَوْنُهُ إِذَا اللَّهُ سَمِعَ عَلَيْهِ صاحب الحدود والحسنات وراغب المجنَة والدرجات على الشّفقة بن عابدين ك أكن جزيرة الكريد قندي درحله سوري جشمه\",\n  \"confidence\": 0.95\n}\n```",
+  "elapsed_seconds": 16.3042093749973,
+  "temperature": 0.0,
+  "max_tokens": 4096
+}

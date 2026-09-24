@@ -43,6 +43,7 @@ class HTRComparison:
     region_source: str
     human: Reading | None = None
     readings: list[Reading] = field(default_factory=list)
+    failures: list[dict] = field(default_factory=list)
     crop: str | None = None
     preview: str | None = None
     crop_width: int | None = None
@@ -92,6 +93,21 @@ def load_htr_comparisons(data: Path, page_id: str, issues: list[str]) -> list[HT
                 groups.append(group)
         except (ValueError, KeyError, TypeError, AttributeError, OSError) as exc:
             issues.append(f'{annotation_path.relative_to(data)}: HTR region references unavailable ({exc}).')
+
+    # Frozen inference inputs are layout references only, never reviewed text.
+    manifest_path = data / 'htr-inputs' / f'{page_id}.json'
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+            if manifest['coordinate_system'] != 'normalized-1000':
+                raise ValueError('Unsupported input coordinate system')
+            for item in manifest['regions']:
+                if any(g.region.id == item['id'] for g in groups):
+                    continue
+                region = Region(item['id'], item['type'], tuple(item['bbox']))
+                groups.append(HTRComparison(region, manifest_path.relative_to(data).as_posix()))
+        except (ValueError, KeyError, TypeError, OSError) as exc:
+            issues.append(f'{manifest_path.relative_to(data)}: HTR inputs unavailable ({exc}).')
 
     corrected_path = data / 'ground-truth' / 'alto' / f'{page_id}.xml'
     if corrected_path.is_file():
@@ -153,12 +169,21 @@ def load_htr_comparisons(data: Path, page_id: str, issues: list[str]) -> list[HT
                         linkage='Machine ALTO: stable region ID or unique reciprocal bbox IoU ≥ 0.95'))
         except Exception as exc:
             issues.append(f'{path.relative_to(data)}: eScriptorium region transcription unavailable ({exc}).')
+    for path in sorted((data / 'htr-errors' / page_id).rglob('*.json')):
+        try:
+            saved = json.loads(path.read_text(encoding='utf-8'))
+            matches = [g for g in groups if g.region.id == saved.get('region_id')]
+            system = system_name(str(saved.get('model')))
+            if len(matches) == 1 and not any(r.system == system for r in matches[0].readings):
+                matches[0].failures.append({'system': system, 'source': path.relative_to(data).as_posix()})
+        except (ValueError, TypeError, AttributeError, OSError) as exc:
+            issues.append(f'{path.relative_to(data)}: HTR failure record unavailable ({exc}).')
     for group in groups:
         group.readings.sort(key=lambda r: ({'eScriptorium': 0, 'Qwen3-VL 8B': 1, 'Qwen3-VL 30B': 2}.get(r.system, 3), r.source))
         if group.human is not None:
             for reading in group.readings:
                 reading.metrics = htr_metrics(group.human.text, reading.text)
-    return [g for g in groups if g.readings]
+    return [g for g in groups if g.readings or g.failures]
 
 
 def render_htr_crops(groups: list[HTRComparison], original: Path, output: Path) -> None:

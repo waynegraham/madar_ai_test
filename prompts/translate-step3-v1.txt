@@ -1,0 +1,15 @@
+Act as a critical reviewer of this proposed analysis and translation.
+
+Do not assume the proposed translation is correct.
+
+Compare it directly against the original text and identify:
+- mistranslations
+- anachronistic modern meanings
+- unjustified normalization
+- incorrect language identification
+- missed Arabic/Persian/Ottoman constructions
+- alternatives that should have been preserved
+- claims unsupported by the source text
+
+For every criticism, quote the relevant source word or short phrase
+and explain the issue.

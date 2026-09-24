@@ -91,16 +91,41 @@ class HTRReportTests(unittest.TestCase):
         self.assertEqual(groups[0].readings[0].text,'')
         self.assertEqual(groups[0].readings[0].metrics.cer,1)
 
+    def test_frozen_machine_inputs_allow_comparison_before_review(self):
+        (self.data/'ground-truth/page.json').unlink()
+        self.write('htr-inputs/page.json', {
+            'coordinate_system': 'normalized-1000', 'region_source': 'alto/page.xml',
+            'regions': [self.item]})
+        groups, issues = self.load()
+        self.assertFalse(issues)
+        self.assertEqual(len(groups), 1)
+        self.assertIsNone(groups[0].human)
+        self.assertIsNone(groups[0].readings[0].metrics)
+        xml = '''<alto xmlns="http://www.loc.gov/standards/alto/ns-v4#"><Layout><Page WIDTH="1000" HEIGHT="1000"><PrintSpace><TextBlock ID="human-1" HPOS="100" VPOS="100" WIDTH="700" HEIGHT="700"><TextLine ID="line"><String CONTENT="سلام"/></TextLine></TextBlock></PrintSpace></Page></Layout></alto>'''
+        path = self.data/'ground-truth/alto/page.xml'
+        path.parent.mkdir(parents=True)
+        path.write_text(xml)
+        groups, issues = self.load()
+        self.assertFalse(issues)
+        self.assertEqual(groups[0].human.text, 'سلام')
+        self.assertIsNotNone(groups[0].readings[0].metrics)
+
+    def test_failed_inference_is_visible_without_becoming_a_reading(self):
+        self.write('htr-errors/page/qwen/failure.json', {
+            'model': 'qwen3-vl-30b-a3b-instruct-mlx', 'region_id': 'human-1'})
+        groups, issues = self.load()
+        self.assertFalse(issues)
+        self.assertEqual(len(groups[0].readings), 1)
+        self.assertEqual(groups[0].failures[0]['system'], 'Qwen3-VL 30B')
+
     def test_real_saved_readings_have_no_accuracy(self):
         data=Path(__file__).resolve().parents[1]/'data'
         issues=[]
         groups=load_htr_comparisons(data,'1280_AB010309_0005',issues)
-        self.assertFalse(issues)
-        self.assertEqual(len(groups),1)
-        self.assertEqual(groups[0].region.id,'human-382299a4')
-        self.assertEqual([r.system for r in groups[0].readings],['Qwen3-VL 8B','Qwen3-VL 30B'])
-        self.assertIsNone(groups[0].human)
-        self.assertTrue(all(r.metrics is None for r in groups[0].readings))
+        # Corpus contents grow as inference runs; legacy orphan readings stay excluded.
+        self.assertTrue(all('no unique human-defined region link' in issue for issue in issues))
+        self.assertTrue(all(g.human is None for g in groups))
+        self.assertTrue(all(r.metrics is None for g in groups for r in g.readings))
 
 
 if __name__=='__main__':

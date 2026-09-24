@@ -1,0 +1,13 @@
+Using the original transcription and the linguistic analysis below,
+translate the passage into English.
+
+Produce:
+
+1. Literal translation
+2. Readable scholarly translation
+3. Translation notes
+4. Alternative translations for ambiguous passages
+5. Words or phrases you cannot translate confidently
+
+Do not silently resolve uncertainties identified in the linguistic
+analysis.

@@ -1,0 +1,27 @@
+{
+  "page_id": "436_AB008999_0003",
+  "region_id": "eSc_textblock_65019d9c",
+  "region_bbox": [
+    105.78426263679,
+    263.32072877277415,
+    858.2595101615425,
+    755.586112066002
+  ],
+  "region_source": "htr-inputs/436_AB008999_0003.json",
+  "image_sha256": "5e09fa19a467185e53294d4c2e5814587f79bd802e0fc8962e3d2d82ece14d90",
+  "model": "qwen3-vl-30b-a3b-instruct-mlx",
+  "task": "htr",
+  "prompt_version": "htr-v1",
+  "image": "data/crops/436_AB008999_0003/eSc_textblock_65019d9c.png",
+  "prompt": "You are transcribing a cropped region from a historical\nArabic-script archival document.\n\nProduce a diplomatic transcription of the visible text.\n\nRequirements:\n\n- Preserve the original spelling.\n- Preserve the original language.\n- Do not translate.\n- Do not modernize spelling.\n- Do not silently correct grammar.\n- Do not invent missing text.\n- Use [?] for text that cannot be read with reasonable confidence.\n- Preserve line breaks where they are visually apparent.\n\nAlso identify the script and probable language.\n\nReturn ONLY valid JSON:\n\n{\n  \"script\": \"...\",\n  \"language\": \"...\",\n  \"transcription\": \"...\",\n  \"confidence\": 0.0\n}",
+  "response": {
+    "script": "Arabic",
+    "language": "Arabic",
+    "transcription": "عَلَى\n٤٣٢\nصَفْحَةُ\nنَجَا بِتَلْوِ جَمْعٍ إِدَافٌ دِى حَضَرَ تَلْوِنِكَ\nسُرَّالَهُ سِى عَنْبِرَا غَا حَضَرَ تَلْوِنِكَ\nخِيرَاتٌ مَعْبَرَا تَلْوِدِرُ قَرِى تَتْ إِيَدٌ لَنْخُوَ\nدِينَ خِيُودٌ عَا إِيلَهُ يَادا يَلْسِرِكَ\nمَرْجُودٌ رَ فَنْ بِدَ لَهُ بَعْدٌ مَا سَبْعَهُ\nفَانَا اسِمِهِ عَلَى الْتِنِ يِبَدَ لُوْنِهِ\nاَلَّذِي سَمِعَ عَلَيْهِ\nحَسَبُ كَانَتْ\nمَدُوَفَةٌ فِي دَرَسٍ نَظْرِ كَتَبُ بِدَ الْمَدِرِكَ\n",
+    "confidence": 0.9
+  },
+  "raw_content": "```json\n{\n  \"script\": \"Arabic\",\n  \"language\": \"Arabic\",\n  \"transcription\": \"عَلَى\\n٤٣٢\\nصَفْحَةُ\\nنَجَا بِتَلْوِ جَمْعٍ إِدَافٌ دِى حَضَرَ تَلْوِنِكَ\\nسُرَّالَهُ سِى عَنْبِرَا غَا حَضَرَ تَلْوِنِكَ\\nخِيرَاتٌ مَعْبَرَا تَلْوِدِرُ قَرِى تَتْ إِيَدٌ لَنْخُوَ\\nدِينَ خِيُودٌ عَا إِيلَهُ يَادا يَلْسِرِكَ\\nمَرْجُودٌ رَ فَنْ بِدَ لَهُ بَعْدٌ مَا سَبْعَهُ\\nفَانَا اسِمِهِ عَلَى الْتِنِ يِبَدَ لُوْنِهِ\\nاَلَّذِي سَمِعَ عَلَيْهِ\\nحَسَبُ كَانَتْ\\nمَدُوَفَةٌ فِي دَرَسٍ نَظْرِ كَتَبُ بِدَ الْمَدِرِكَ\\n\",\n  \"confidence\": 0.9\n}\n```",
+  "elapsed_seconds": 12.202155000006314,
+  "temperature": 0.0,
+  "max_tokens": 4096
+}
