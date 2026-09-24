@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How this experiment works · Manuscript studies</title>
+  <link rel="stylesheet" href="static/css/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <a class="publication-title" href="index.html">Manuscript studies</a>
+    <span class="publication-subtitle">A working research publication</span>
+    <nav class="publication-nav" aria-label="Publication"><a href="index.html">Manuscripts</a><a href="overview.html">Corpus overview</a><a href="method.html" aria-current="page">How this experiment works</a></nav>
+  </header>
+  <main id="content" tabindex="-1">
+<article class="method-page">
+<header class="page-heading">
+<p class="eyebrow">A guide for readers</p>
+<h1>How this experiment works</h1>
+<p class="lede">We ask whether computer-generated suggestions can help scholars find and examine features of manuscripts. The manuscript remains the evidence; a machine’s account of it remains a proposal until it has been reviewed.</p>
+<nav class="section-nav" aria-label="On this page"><a href="#workflow">The process</a><a href="#terms">Key terms</a><a href="#interpretation">What the results can tell us</a></nav>
+</header>
+<section aria-labelledby="workflow">
+<h2 id="workflow">From manuscript to possible discovery</h2>
+<p>This is the intended sequence of the experiment. It describes a method, not a claim that every manuscript has completed every step.</p>
+<ol class="method-pipeline">
+<li><h3>Original manuscript</h3><p>We begin with a digital image of the manuscript page and retain the original file unchanged. Smaller display copies help us examine the page; detailed crops come from the original image.</p></li>
+<li><h3>Segmentation</h3><p>The system proposes boundaries around parts of the page, such as a passage of text or a mark in the margin.</p></li>
+<li><h3>Region classification</h3><p>Each region receives a proposed description, such as main text, handwritten annotation, or stamp or seal. A boundary and a description are separate suggestions: either can need correction.</p></li>
+<li><h3>Script and language identification</h3><p>The system suggests which writing system and language may be present. These are different questions: identifying Arabic script does not by itself establish that the language is Arabic.</p></li>
+<li><h3>HTR</h3><p>The system attempts to transcribe the visible writing. The aim is to retain original spelling and line breaks, without translation or silent correction; whether it succeeds must be checked against the image.</p></li>
+<li><h3>Human correction in eScriptorium</h3><p>A scholar examines the page and corrects region boundaries, labels, and transcriptions as needed. Human-reviewed eScriptorium annotations are the authoritative reference for evaluation within the scope of that review; uncorrected machine output from eScriptorium is still a prediction.</p></li>
+<li><h3>Evaluation</h3><p>We compare predictions with the human-reviewed reference. Without that reference, we can describe differences between systems, but cannot call their agreement accuracy.</p></li>
+<li><h3>Potential corpus-scale discovery</h3><p>Reviewed features and readings could eventually help scholars find comparable material across many manuscripts. Any proposed connection would still need examination in its historical context.</p></li>
+</ol>
+<aside class="scholarly-note"><p><strong>How the current experiments fit.</strong> The models propose region boundaries and types together. Script, language, and transcription are also requested together, while the saved HTR experiments use human-drawn regions. Human correction and evaluation are therefore not completed merely because a machine result appears in the report; each manuscript page identifies the reference material actually available.</p></aside>
+</section>
+<section aria-labelledby="terms">
+<h2 id="terms">Key terms</h2>
+<dl class="method-glossary">
+<div><dt>Segmentation</dt><dd>Dividing a page image into regions that can be examined separately. A proposed region might enclose a block of writing, a marginal note, or a seal.</dd></div>
+<div><dt>HTR</dt><dd>Handwritten text recognition: using a computer to turn an image of handwriting into text. The result is a suggested transcription, not a verified reading.</dd></div>
+<div><dt>Vision-language model</dt><dd>A computer model trained to work with images and language. It can respond to a manuscript image with descriptions or proposed transcriptions, but a fluent response does not establish historical understanding.</dd></div>
+<div><dt>Ground truth</dt><dd>The human-reviewed reference used to assess a system’s results. In this project, human-corrected eScriptorium annotations can serve as that reference; machine-generated ALTO files cannot become ground truth simply by being exported from eScriptorium.</dd></div>
+<div><dt>CER</dt><dd>Character error rate measures how many character insertions, deletions, or substitutions are needed to turn a proposed transcription into the reference text, divided by the reference’s character count. It measures textual differences, not the scholarly importance of a misreading.</dd></div>
+<div><dt>WER</dt><dd>Word error rate makes the same kind of comparison using words rather than characters. A low rate does not guarantee that a crucial name, date, or phrase has been read correctly.</dd></div>
+<div><dt>Visual similarity</dt><dd>A resemblance in appearance, such as similar shapes, layouts, or marks. Resemblance alone does not establish that two marks have the same owner, institution, date, or meaning.</dd></div>
+</dl>
+<p class="scholarly-note">CER and WER are shown only when a linked human-corrected transcription is available. This report does not silently normalize spelling or Unicode text; its technical details explain how characters, words, and line breaks are compared.</p>
+</section>
+<section class="interpretation-section" aria-labelledby="interpretation">
+<p class="eyebrow">Observation and interpretation</p><h2 id="interpretation">What the results can tell us</h2>
+<p><strong>Machine results are suggestions.</strong> Several systems can agree and still be mistaken. A high confidence value is a model’s estimate, not scholarly certainty or a substitute for checking the manuscript.</p>
+<p><strong>Detecting something and interpreting it are different tasks.</strong> A system may locate a seal without reading its inscription or establishing whose seal it was. A region label records a proposed visible feature; historical significance requires further evidence.</p>
+<p><strong>Waqf belongs initially to semantic interpretation.</strong> Here, that means interpreting meaning and function, rather than treating “waqf” as another visual region type. Relevant evidence might occur in a passage, an annotation, a seal, or several parts of a document considered together.</p>
+<p><strong>Human review establishes the reference.</strong> Its scope matters: corrected boundaries do not automatically imply corrected text. Review decisions and unresolved readings should remain visible and open to scholarly revision.</p>
+<aside class="callout-question"><p>What does the image support—and what further reading or contextual evidence would be needed before making a historical claim?</p></aside>
+<p><a href="index.html">Return to the manuscript images</a> to examine the saved observations and their review status.</p>
+</section>
+</article>
+</main>
+  <footer class="site-footer"><p>Compiled from saved research files. No models were run to generate this report.</p><p>Image evidence, proposed readings, and scholarly interpretation are presented separately.</p></footer>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Corpus overview · Manuscript studies</title>
+  <link rel="stylesheet" href="static/css/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <a class="publication-title" href="index.html">Manuscript studies</a>
+    <span class="publication-subtitle">A working research publication</span>
+    <nav class="publication-nav" aria-label="Publication"><a href="index.html">Manuscripts</a><a href="overview.html" aria-current="page">Corpus overview</a><a href="method.html">How this experiment works</a></nav>
+  </header>
+  <main id="content" tabindex="-1">
+<header class="page-heading"><p class="eyebrow">Scope of the available evidence</p><h1>Corpus overview</h1>
+<p class="lede">The available files represent 7 manuscript pages. This is the current research sample, not a count of the wider collection.</p>
+<p>All counts below are recalculated from available images, readable saved results, and reference records when the report is built. A page identifier is counted once even when several systems analyzed it.</p></header>
+<section aria-labelledby="coverage"><h2 id="coverage">What is represented?</h2>
+<div class="table-wrap" role="region" aria-label="Available corpus coverage" tabindex="0"><table class="comparison-table"><caption>Coverage of the current sample</caption><thead><tr><th scope="col">Material</th><th scope="col">Count</th><th scope="col">Scope and denominator</th></tr></thead><tbody>
+<tr><th scope="row">Manuscripts represented</th><td>Unavailable</td><td>0 of 7 pages have an explicit manuscript identity. Pages are not assumed to be separate manuscripts.</td></tr>
+<tr><th scope="row">Pages represented</th><td>7</td><td>Distinct page identifiers in the available data.</td></tr>
+<tr><th scope="row">Pages with eScriptorium results</th><td>6</td><td>Of 7 pages; at least one readable prediction record, in any saved task.</td></tr><tr><th scope="row">Pages with Qwen3-VL 8B results</th><td>7</td><td>Of 7 pages; at least one readable prediction record, in any saved task.</td></tr><tr><th scope="row">Pages with Qwen3-VL 30B results</th><td>7</td><td>Of 7 pages; at least one readable prediction record, in any saved task.</td></tr>
+<tr><th scope="row">Pages with human-reviewed ground truth</th><td>0</td><td>Of 7 pages; corrected ALTO or an explicitly corrected region transcription. Review may cover only part of a page.</td></tr>
+<tr><th scope="row">Total detected regions</th><td>132</td><td>Across 20 segmentation records on 7 pages. Counts repeat features seen by multiple systems or runs; these are not unique manuscript features.</td></tr>
+<tr><th scope="row">HTR regions evaluated</th><td>0</td><td>Of 0 human-defined regions with linked readings; 0 system–reference comparisons across 0 pages.</td></tr>
+</tbody></table></div>
+<aside class="scholarly-note"><p><strong>Manuscript identities need documentation.</strong> The current files do not provide a complete, explicit page-to-manuscript mapping. The report does not infer manuscript identities from filename fragments or treat an export’s generic document container as a catalogue identity.</p></aside>
+<p class="scholarly-note">Human-drawn boxes without recorded review do not count as human-reviewed ground truth. Machine-generated eScriptorium ALTO always counts as a prediction.</p>
+</section>
+<section aria-labelledby="region-counts"><h2 id="region-counts">Recorded regions by type</h2>
+<div class="table-wrap" role="region" aria-label="Region counts by system and prompt" tabindex="0"><table class="comparison-table"><caption>Usable predicted bounding boxes; corrected reference regions are excluded</caption><thead><tr><th scope="col">Region type</th><th scope="col">Qwen3-VL 30B · segmentation-v1<br><small>7 pages · 7 records</small></th><th scope="col">Qwen3-VL 8B · segmentation-v1<br><small>7 pages · 7 records</small></th><th scope="col">eScriptorium · unrecorded<br><small>6 pages · 6 records</small></th><th scope="col">All records<br><small>7 pages · 20 records</small></th></tr></thead><tbody>
+<tr><th scope="row">Main text</th><td>8</td><td>5</td><td>33</td><td>46</td></tr><tr><th scope="row">Marginal text</th><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><th scope="row">Stamp or seal</th><td>10</td><td>11</td><td>6</td><td>27</td></tr><tr><th scope="row">Handwritten annotation</th><td>21</td><td>15</td><td>9</td><td>45</td></tr><tr><th scope="row">Archival mark</th><td>6</td><td>6</td><td>0</td><td>12</td></tr><tr><th scope="row">Illustration</th><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><th scope="row">Unclassified region</th><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+</tbody><tfoot><tr><th scope="row">Total</th><td>46</td><td>37</td><td>49</td><td>132</td></tr></tfoot></table></div>
+<p class="scholarly-note">A zero means no usable box was assigned that type in these records. Blocks without bounding boxes are excluded; differing region sizes or subdivisions can affect counts. “Unrecorded” means a prompt version is not supplied by the saved source.</p>
+</section>
+<section aria-labelledby="evaluation"><h2 id="evaluation">Evaluation against reviewed regions</h2>
+<p>Aggregate layout evaluation requires at least 5 paired pages for the same system and prompt, with complete layout review explicitly documented. This is a reporting threshold, not a guarantee of a representative or statistically sufficient sample.</p>
+<p><strong>Per-region-type evaluation is not yet available for a sufficient documented sample.</strong> Missing metrics are not zero scores.</p>
+<p>No system currently has an eligible paired sample with documented complete layout review.</p>
+<details class="technical-details"><summary>Evaluation scope, sample sizes, and exclusions</summary><p>Each page is matched separately with the existing evaluator, using bounding-box IoU ≥ 0.5 and the same region type. True positives, false positives, and false negatives are pooled across the eligible pages before calculating rates; they are not averaged across pages.</p><p>Precision is the matched share of predicted regions; recall is the matched share of reference regions. F1 balances these two measures. Each row reports both region denominators, all paired pages, and the number of those pages containing a reference region of that type. A small type-specific sample still needs caution even when the overall page threshold is met.</p><p>Only a single corrected ALTO reference with no omitted unbounded blocks is eligible per page, and complete layout review must be explicitly documented in <code>data/corpus.json</code>. Partial or undocumented review cannot support false-positive counts. Multiple prediction records for the same system and prompt on a page are excluded from evaluation rather than silently choosing one. 0 ambiguous system–page combinations were excluded.</p><p>The inventory includes all readable prediction records, while the evaluation uses only eligible paired records. The reviewed-page count includes partial references and therefore may exceed evaluation coverage. HTR regions evaluated counts distinct linked reference regions with at least one computed CER/WER result, not the number of model readings.</p></details>
+</section>
+<section aria-labelledby="sample-pages"><h2 id="sample-pages">Pages in this sample</h2><ul><li><a href="manuscripts/dd2e8501c12894282923.html">00003-1345-AB009712</a></li><li><a href="manuscripts/9b0a82cf1ede8e473f8d.html">00003-747-AB009300</a></li><li><a href="manuscripts/c25cefbd1e3b82ccfa50.html">00007-97-AB008730</a></li><li><a href="manuscripts/041911ebe6f6632b6c0b.html">1280_AB010309_0005</a></li><li><a href="manuscripts/fc53bdf3e4c7cba9d6db.html">436_AB008999_0003</a></li><li><a href="manuscripts/4ff8e918004b8e7491e5.html">670_AB009188_0003</a></li><li><a href="manuscripts/1db0ed370b106da929fd.html">Buchanan MSS1P9267fFA2</a></li></ul></section>
+<aside class="experimental-warning"><h2>Data limitations</h2><ul><li>results/1280_AB010309_0005/qwen3-vl-30b/htr/human-382299a4-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li><li>results/1280_AB010309_0005/qwen3-vl-30b/htr/human-81f43a2d-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li><li>results/1280_AB010309_0005/qwen3-vl-30b/htr/human-855bed91-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li><li>results/1280_AB010309_0005/qwen3-vl-30b/htr/human-dbb419a1-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li><li>results/1280_AB010309_0005/qwen3-vl-8b/htr/human-382299a4-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li><li>results/1280_AB010309_0005/qwen3-vl-8b/htr/human-81f43a2d-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li><li>results/1280_AB010309_0005/qwen3-vl-8b/htr/human-855bed91-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li><li>results/1280_AB010309_0005/qwen3-vl-8b/htr/human-dbb419a1-htr-v1.json: HTR result has no unique human-defined region link; excluded from comparison.</li></ul></aside>
+</main>
+  <footer class="site-footer"><p>Compiled from saved research files. No models were run to generate this report.</p><p>Image evidence, proposed readings, and scholarly interpretation are presented separately.</p></footer>
+</body>
+</html>
