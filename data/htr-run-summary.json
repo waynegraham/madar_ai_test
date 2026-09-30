@@ -97,34 +97,18 @@
           "empty_readings": 0
         }
       }
-    },
-    {
-      "page_id": "Buchanan MSS1P9267fFA2",
-      "regions": 1,
-      "models": {
-        "qwen3-vl-8b": {
-          "saved_readings": 1,
-          "failed_attempts": 0,
-          "empty_readings": 0
-        },
-        "qwen3-vl-30b": {
-          "saved_readings": 1,
-          "failed_attempts": 0,
-          "empty_readings": 0
-        }
-      }
     }
   ],
   "models": {
     "qwen3-vl-8b": {
       "model": "qwen3-vl-8b-instruct-mlx",
-      "saved_readings": 30,
+      "saved_readings": 29,
       "failed_attempts": 20,
       "empty_readings": 9
     },
     "qwen3-vl-30b": {
       "model": "qwen3-vl-30b-a3b-instruct-mlx",
-      "saved_readings": 50,
+      "saved_readings": 49,
       "failed_attempts": 0,
       "empty_readings": 0
     }
